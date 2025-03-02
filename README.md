@@ -1,7 +1,8 @@
-BC SuccessGuide
+# BC SuccessGuide
+
 BC SuccessGuide is an interactive app designed for Communications, Communication Sciences and Disorders, and Africana Studies chairs/professsors and their students at Brooklyn College to help track and guide their degree progress and predict their graduation date. It offers a variety of tools to help students stay on track with their courses, GPA, and future career opportunities.
 
-Features
+## Features
 1. Dashboard
 Interactive Flowchart: Easily track your course selections and visualize your academic journey.
 Clicking on a class allows you to add it to your schedule.
@@ -31,8 +32,12 @@ It checks if your desired GPA is achievable within those bounds before proceedin
 When you’ve completed all checklist items, a congratulatory pop-up message appears:
 Message 1: “Hey, it’s good that you’re doing well in your difficult classes, but don’t downplay the easy ones.”
 Message 2: “You need to study better for your difficult classes. You might be spending too much time on the easy ones.”
-Tech Stack
+
+## Tech Stack
 Frontend: React, Vite, HTML/CSS
+
 Backend: Node.js, Express
+
 Database: MongoDB
+
 Version Control: Git
