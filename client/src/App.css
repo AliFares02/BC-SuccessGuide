@@ -1,0 +1,208 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap");
+html,
+body {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+body {
+  height: fit-content;
+  background-image: url("/assets/images/cardboard-texture.jpg");
+  background-size: contain;
+  background-repeat: repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+}
+.app-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: fit-content;
+}
+.navbar {
+  position: fixed;
+  inset: 0.5rem 0.5rem 0 0.5rem;
+  min-width: fit-content;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 3.5rem;
+  background: rgb(136, 35, 70);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-radius: 0.6rem;
+  color: white;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.logo {
+  margin: 0 0 0 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+}
+
+.burger-menu {
+  display: none !important;
+  position: absolute;
+  height: 1.1rem;
+  width: 1.5rem;
+  top: 1.25rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.burger-menu span {
+  position: absolute;
+  width: 1.5rem;
+  height: 2px;
+  background-color: black;
+  display: block;
+  background-color: white;
+  border-radius: 1rem;
+  transform-origin: center;
+  transition: all 0.2s ease;
+}
+
+.burger-menu span:nth-child(1) {
+  top: 0;
+}
+
+.burger-menu span:nth-child(2) {
+  top: 0.5rem;
+}
+
+.burger-menu span:nth-child(3) {
+  top: 1rem;
+}
+
+.burger-menu.is-active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.burger-menu.is-active span:nth-child(2) {
+  opacity: 0;
+}
+.burger-menu.is-active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+.navbar li a {
+  margin: 0 1rem 0 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  display: inline-block;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.navbar li a:not(.authentication-btn):hover {
+  opacity: 0.5;
+  transform: translateY(-0.2rem);
+}
+
+.authentication-btn {
+  background-color: white;
+  text-align: center;
+  color: black !important;
+  padding: 0.5rem;
+  margin-left: 0.5rem !important;
+  border-radius: 0.6rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+}
+
+.authentication-btn:hover {
+  transform: translateY(-0.1rem);
+  box-shadow: 0 3px 10px -1.5px rgba(0, 0, 0, 0.8);
+}
+
+/* mobile navbar */
+@media (max-width: 882px) {
+  .navbar {
+    flex-direction: column;
+    min-height: 3.5rem;
+    height: fit-content;
+  }
+  .logo {
+    margin: 0.7rem;
+  }
+  .nav-links {
+    margin: 0;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+  }
+  .nav-links.open {
+    transform: scaleY(1);
+    max-height: 300px;
+    opacity: 1;
+  }
+  .authentication-btn {
+    margin: 0 0 1.5rem 0 !important;
+    width: 5rem;
+  }
+  .burger-menu {
+    display: block !important;
+  }
+  .alumni-sub-container {
+    flex-direction: column;
+  }
+  .section-divider {
+    height: 1px !important;
+    width: 90% !important;
+  }
+  .alumni-sub-container ul {
+    columns: 2;
+    column-gap: 2rem;
+    max-width: 33rem;
+  }
+}
+
+/* dashboard styling */
+.dashboard-container {
+  display: flex;
+  width: 100%;
+  margin-top: 4rem;
+  height: fit-content;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.page-title,
+.dashboard-container h2 {
+  text-align: center;
+  width: 90%;
+  color: rgb(136, 35, 70);
+}
+
+.react-flow {
+  border: 1px solid rgb(155, 155, 155);
+}
+
+.react-flow__node {
+  border: none !important;
+  color: black !important;
+}
