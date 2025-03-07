@@ -66,6 +66,31 @@ function Dashboard() {
     <div className="dashboard-container">
       <h1 className="page-title">My Communication Flowchart</h1>
       <FlowChart />
+      <div className="outlook-stats-section">
+        <h2>More about your degree</h2>
+        <div>
+          <BsGraphUp />
+          <p>
+            Communications careers are expected to grow <b>6%</b> from 2023 to
+            2033
+          </p>
+        </div>
+        <div>
+          <BsCashCoin />
+          <p>
+            Salaries in Communications range from <b>$50,000</b> to{" "}
+            <b>$95,000</b>
+          </p>
+        </div>
+        <div>
+          <BsTools />
+          <p>
+            Key skills for communications professionals include{" "}
+            <b>public speaking</b>, <b>writing</b>, <b>digital marketing</b>,{" "}
+            <b>social media management</b>, and <b>strategic thinking</b>.
+          </p>
+        </div>
+      </div>
       <div className="alumni-container">
         <h1>Alumni Destinations: Careers & Grad programs</h1>
         <div className="alumni-sub-container">
@@ -135,31 +160,6 @@ function Dashboard() {
                 <li>No subcategories available</li>
               )}
             </ul>
-          </div>
-        </div>
-        <div className="outlook-stats-section">
-          <h2>More about your degree</h2>
-          <div>
-            <BsGraphUp />
-            <p>
-              Communications careers are expected to grow <b>6%</b> from 2023 to
-              2033
-            </p>
-          </div>
-          <div>
-            <BsCashCoin />
-            <p>
-              Salaries in Communications range from <b>$50,000</b> to{" "}
-              <b>$95,000</b>
-            </p>
-          </div>
-          <div>
-            <BsTools />
-            <p>
-              Key skills for communications professionals include{" "}
-              <b>public speaking</b>, <b>writing</b>, <b>digital marketing</b>,{" "}
-              <b>social media management</b>, and <b>strategic thinking</b>.
-            </p>
           </div>
         </div>
       </div>

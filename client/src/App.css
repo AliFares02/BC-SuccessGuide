@@ -206,3 +206,30 @@ body {
   border: none !important;
   color: black !important;
 }
+
+.outlook-stats-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  text-align: center;
+  gap: 5rem;
+  width: 90%;
+}
+
+.outlook-stats-section div {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
+  flex-basis: 15rem;
+  flex-grow: 0.2;
+}
+
+.outlook-stats-section svg {
+  color: rgb(136, 35, 70);
+  font-size: 2.5rem;
+}
+
+.outlook-stats-section b {
+  color: rgb(136, 35, 70);
+}
