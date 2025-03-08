@@ -91,6 +91,17 @@ function Dashboard() {
           </p>
         </div>
       </div>
+      <div>
+        <h2>My Academic & Career Tracker</h2>
+        {/* a div that shows the current course schedule as well as the pathways checklist items that the student marked off as 'doing' */}
+      </div>
+      <div>
+        {/* make college life, expand your horizons, pathway to success be cards and once clicked will take them to pathways page, change pathways name to something more generic rather than college specific.  */}
+        <h2>Get the Tools to Jumpstart Your Future in CASD</h2>
+        <div className="thumbnail-card">College Life</div>
+        <div className="thumbnail-card">Expand Your Horizons</div>
+        <div className="thumbnail-card">Pathway to Success</div>
+      </div>
       <div className="alumni-container">
         <h1>Alumni Destinations: Careers & Grad programs</h1>
         <div className="alumni-sub-container">
