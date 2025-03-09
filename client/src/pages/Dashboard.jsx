@@ -1,73 +1,29 @@
 import React, { useState } from "react";
 import FlowChart from "../components/FlowChart";
 import { BsGraphUp, BsTools, BsCashCoin } from "react-icons/bs";
+import { MdOutlinePendingActions } from "react-icons/md";
 
 function Dashboard() {
-  const [selectedCategory, setSelectedCategory] = useState(0);
-  const categories = [
-    "General",
-    "Media",
-    "Emergency, Crisis & RiskCommunication",
-    "Sports",
-    "Journalism",
-    "Public Relations",
-    "Social Media",
+  const [selectedChecklistCategory, setSelectedChecklistCategory] = useState(0);
+  const checklistCategories = [
+    "College Life",
+    "Expand Your Horizons",
+    "Pathway to Success",
   ];
-  const subCategories = {
+  const checkListCategoryTasks = {
     0: [
-      "Center for Communication",
-      "International Association of Business Communicators",
-      "National Association of Government Communicators",
-      "National Communication Association",
-      "New York Women in Communications",
-      "Toastmasters International",
+      "Create a Handshake account",
+      "Visit the Learning Center to see how it can help you achieve academic success",
     ],
-    1: [
-      "Emma Bowen Foundation (EBF)",
-      "International Radio & Television Society Foundation (IRTS)",
-      "National Association for Multi-ethnicity in Communications(NAMIC)",
-      "National Association of Broadcasters",
-    ],
-    2: [
-      "American Society for Health Care Risk Management",
-      "Association of Healthcare Emergency Preparedness Professionals",
-      "Association of Public-Safety Communications Officials (APCO International)",
-      "International Association of Emergency Managers",
-      "International Association of Risk and Crisis Communication (IARCC)",
-    ],
-    3: [
-      "Association for Women in Sports Media",
-      "College Sports Communicators",
-      "National Sports Media Association",
-      "North American Society for Sport Management",
-      "Sport Marketing Association",
-    ],
-    4: [
-      "Asian American Journalists Association",
-      "Association of LGBTQ+ Journalists",
-      "Indigenous Journalists Association",
-      "National Association of Hispanic Journalists",
-      "National Association of Black Journalists",
-      "National Press Club",
-      "Religion News Association",
-      "Society of Environmental Journalists",
-      "Society of Professional Journalists",
-    ],
-    5: [
-      "Hispanic Public Relations Association",
-      "International Public Relations Association",
-      "National Black Public Relations Society (NBPRS)",
-      "Public Relations Society of America (PRSA)",
-      "Public Relations Student Society of America (PRSSA)",
-    ],
-    6: ["American Association of Social Media Professionals"],
+    1: ["Create a draft résumé or start building a basic résumé"],
+    2: ["Not sure what career(s) interest you? Check out MyNextMove"],
   };
   return (
     <div className="dashboard-container">
       <h1 className="page-title">My Communication Flowchart</h1>
       <FlowChart />
       <div className="outlook-stats-section">
-        <h2>More about your degree</h2>
+        <h2>You should know</h2>
         <div>
           <BsGraphUp />
           <p>
@@ -91,86 +47,117 @@ function Dashboard() {
           </p>
         </div>
       </div>
-      <div>
-        <h2>My Academic & Career Tracker</h2>
-        {/* a div that shows the current course schedule as well as the pathways checklist items that the student marked off as 'doing' */}
-      </div>
-      <div>
-        {/* make college life, expand your horizons, pathway to success be cards and once clicked will take them to pathways page, change pathways name to something more generic rather than college specific.  */}
-        <h2>Get the Tools to Jumpstart Your Future in CASD</h2>
-        <div className="thumbnail-card">College Life</div>
-        <div className="thumbnail-card">Expand Your Horizons</div>
-        <div className="thumbnail-card">Pathway to Success</div>
-      </div>
-      <div className="alumni-container">
-        <h1>Alumni Destinations: Careers & Grad programs</h1>
-        <div className="alumni-sub-container">
-          <div>
-            <h2>Careers</h2>
-            <ul>
-              <li>Google</li>
-              <li>iHeartMedia</li>
-              <li>NYC Department of Education</li>
-              <li>Minds Matter NYC</li>
-              <li>Sony</li>
-              <li>RSA Security</li>
-              <li>Federal Highway Administration</li>
-              <li>Creative Art Works</li>
-              <li>SEQ Technology</li>
-              <li>Pomelatto</li>
-              <li>NBCUniversal</li>
-              <li>Clinton Foundation</li>
-              <li>Tiffany & Co</li>
-              <li>Capital One</li>
-              <li>Giving Forward</li>
-              <li>Oppenheimer & Co</li>
-              <li>FOX</li>
-              <li>YMCA</li>
-              <li>Pratt Institute</li>
-              <li>Memorial Sloan Kettering</li>
-            </ul>
+      <div className="academic-career-tracker-container">
+        <div className="current-course-pathways-tracker">
+          <div className="current-course-pathways-subcontainer-title">
+            <h2>What You're Doing This Semester</h2>
           </div>
-
-          <hr className="section-divider" />
-          <div>
-            <h2>Graduate Programs</h2>
-            <ul>
-              <li>JD, Law</li>
-              <li>MA, Media Studies</li>
-              <li>MA, Public Policy</li>
-              <li>MBA, Human Resources Management and Services</li>
-              <li>PhD, Communication and Rhetoric</li>
-            </ul>
+          <div className="current-courses-pathways-subcontainer">
+            <table className="current-schedule">
+              <thead>
+                <tr>
+                  <th>Current Courses</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ENGL 1010</td>
+                </tr>
+                <tr>
+                  <td>COMM 2000</td>
+                </tr>
+                <tr>
+                  <td>COMM 3000</td>
+                </tr>
+                <tr>
+                  <td>COMM 3100</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="current-checklist">
+              <h3>Milestone Tracker</h3>
+              <div className="current-checklist-tabs">
+                {checklistCategories.map((checkListCategory, index) => (
+                  <label
+                    className={`checkList-category ${
+                      selectedChecklistCategory === index ? "selected" : ""
+                    }`}
+                    key={index}
+                    onClick={() => setSelectedChecklistCategory(index)}
+                  >
+                    {checkListCategory}
+                  </label>
+                ))}
+              </div>
+              <div className="current-checklist-tabs-categories">
+                <ul>
+                  {checkListCategoryTasks[selectedChecklistCategory].length >
+                  0 ? (
+                    checkListCategoryTasks[selectedChecklistCategory].map(
+                      (checkListCategoryTask, index) => (
+                        <li key={index}>
+                          <MdOutlinePendingActions
+                            style={{ color: "rgb(136, 35, 70)" }}
+                          />
+                          {checkListCategoryTask}
+                        </li>
+                      )
+                    )
+                  ) : (
+                    <li>No tasks in progress</li>
+                  )}
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
+        {/* a div that shows the current course schedule as well as the pathways checklist items that the student marked off as 'doing' */}
       </div>
-      <div className="student-career-outlook-container">
-        <h1 className="page-title">What you can do with your degree</h1>
-        <div className="organizations-container">
-          <h2>Organizations you can join</h2>
-          <div className="tabs">
-            {categories.map((category, index) => (
-              <label
-                className={`tab ${
-                  selectedCategory === index ? "selected" : ""
-                }`}
-                key={index}
-                onClick={() => setSelectedCategory(index)}
-              >
-                {category}
-              </label>
-            ))}
+      <div className="pathways-cards-container">
+        {/* make college life, expand your horizons, pathway to success be cards and once clicked will take them to pathways page, change pathways name to something more generic rather than college specific.  */}
+        <h2>Get the Tools to Jumpstart Your Future in CASD</h2>
+        <div className="pathways-cards-sub-container">
+          <div className="thumbnail-card">
+            <img src="/assets/images/college_life_1.jpg" alt="" />
+            <div>
+              <h2>College Life</h2>
+            </div>
+
+            <div className="overlay">
+              <p className="card-desc">
+                Engage in academic and campus resources to build a strong
+                foundation for success.
+              </p>
+            </div>
+            <p className="learn-more">Learn more &#8640;</p>
           </div>
-          <div className="tab-categories">
-            <ul>
-              {subCategories[selectedCategory].length > 0 ? (
-                subCategories[selectedCategory].map((subCategory, index) => (
-                  <li key={index}>{subCategory}</li>
-                ))
-              ) : (
-                <li>No subcategories available</li>
-              )}
-            </ul>
+          <div className="thumbnail-card">
+            <img src="/assets/images/college_life_1.jpg" alt="" />
+            <div>
+              <h2>Expand Your Horizons</h2>
+            </div>
+
+            <div className="overlay">
+              <p className="card-desc">
+                Take advantage of new experiences, networks, and opportunities
+                beyond the classroom.
+              </p>
+            </div>
+            <p className="learn-more">Learn more &#8640;</p>
+          </div>
+          <div className="thumbnail-card">
+            <img src="/assets/images/college_life_1.jpg" alt="" />
+            <div>
+              <h2>Pathway to Success</h2>
+            </div>
+
+            <div className="overlay">
+              <p className="card-desc">
+                Plan and prepare for your future career with the right tools and
+                guidance.
+              </p>
+            </div>
+            <p className="learn-more">Learn more &#8640;</p>
           </div>
         </div>
       </div>

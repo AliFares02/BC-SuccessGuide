@@ -6,7 +6,7 @@ function Footer() {
     <div className="footer-container">
       <div className="main-footer-content">
         <div>
-          <h3>General</h3>
+          <h4>General</h4>
           <ul>
             <li>
               <a href="#">About Us</a>
@@ -20,7 +20,7 @@ function Footer() {
           </ul>
         </div>
         <div>
-          <h3>Contact Us</h3>
+          <h4>Contact Us</h4>
           <ul>
             <li>communications@brooklyn.cuny.edu</li>
             <li>(718) 951-5225</li>

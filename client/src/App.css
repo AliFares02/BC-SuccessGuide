@@ -134,7 +134,6 @@ body {
 @media (max-width: 882px) {
   .navbar {
     flex-direction: column;
-    min-height: 3.5rem;
     height: fit-content;
   }
   .logo {
@@ -145,17 +144,17 @@ body {
     flex-direction: column;
     gap: 1rem;
     padding: 0;
-    max-height: 0;
+    height: 0;
     opacity: 0;
     overflow: hidden;
     transform: scaleY(0);
     transform-origin: top;
-    transition: max-height 0.3s ease-out, opacity 0.3s ease-out,
+    transition: height 0.3s ease-out, opacity 0.3s ease-out,
       transform 0.3s ease-out;
   }
   .nav-links.open {
     transform: scaleY(1);
-    max-height: 300px;
+    height: 225px;
     opacity: 1;
   }
   .authentication-btn {
@@ -165,18 +164,15 @@ body {
   .burger-menu {
     display: block !important;
   }
-  .alumni-sub-container {
-    flex-direction: column;
-  }
   .section-divider {
     height: 1px !important;
     width: 90% !important;
   }
-  .alumni-sub-container ul {
+  /* .alumni-sub-container ul {
     columns: 2;
     column-gap: 2rem;
     max-width: 33rem;
-  }
+  } */
 }
 
 /* dashboard styling */
@@ -214,6 +210,7 @@ body {
   text-align: center;
   gap: 5rem;
   width: 90%;
+  min-height: 50dvh;
 }
 
 .outlook-stats-section div {
@@ -234,6 +231,208 @@ body {
   color: rgb(136, 35, 70);
 }
 
+.academic-career-tracker-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+  height: 60dvh;
+}
+
+.current-course-pathways-tracker {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 25rem;
+  width: 95%;
+  max-width: 50rem;
+  border: 2px solid rgb(136, 35, 70);
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
+
+.current-course-pathways-subcontainer-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: rgb(136, 35, 70);
+}
+
+.current-course-pathways-subcontainer-title h2 {
+  color: white !important;
+  margin: 0.7rem;
+}
+
+.current-courses-pathways-subcontainer {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
+}
+
+.current-schedule {
+  flex: 1;
+  border-collapse: collapse;
+}
+
+.current-schedule thead {
+  background-color: #c5c5c5;
+}
+
+.current-schedule th {
+  padding: 0.5rem;
+}
+
+.current-schedule th,
+.current-schedule td {
+  border: 1px solid rgb(155, 155, 155);
+}
+
+.current-schedule td {
+  padding-left: 1rem;
+}
+
+.current-schedule tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.current-checklist {
+  display: flex;
+  background-color: #c5c5c5;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 2px solid rgb(136, 35, 70);
+  flex: 1;
+}
+
+.current-checklist h3 {
+  margin: 0.5rem;
+}
+
+.current-checklist-tabs {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  border-top: 1px solid #8d8c8c;
+}
+
+.checkList-category {
+  flex: 1;
+  padding: 0.25rem;
+  text-align: center;
+  align-content: center;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.checkList-category:hover {
+  background-color: #eee;
+}
+
+.selected {
+  color: rgb(136, 35, 70);
+  border-bottom: 2px solid rgb(136, 35, 70);
+}
+
+.current-checklist-tabs-categories {
+  display: flex;
+  width: 100%;
+  flex-grow: 1;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-top-color: #8d8c8c;
+}
+
+.current-checklist-tabs-categories ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.pathways-cards-container {
+  display: flex;
+  flex-direction: column;
+  width: 95%;
+  min-height: 50dvh;
+  margin-bottom: 5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.pathways-cards-sub-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.thumbnail-card {
+  display: block;
+  width: 15rem;
+  height: 20rem;
+  position: relative;
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
+
+.thumbnail-card h2 {
+  color: white;
+}
+.thumbnail-card div {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  text-align: center;
+  color: white;
+  height: 50%;
+  width: 100%;
+}
+
+.overlay {
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5) 20%);
+}
+
+.learn-more {
+  position: absolute;
+  margin: 0;
+  opacity: 0;
+  font-size: 0.85rem;
+  transform: translateY(1rem);
+  color: white;
+  bottom: 0.5rem;
+  right: 1rem;
+  transition: all 0.3s ease-in-out;
+  transition-delay: 0.4s;
+  cursor: pointer;
+}
+
+.thumbnail-card:hover .learn-more {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+.thumbnail-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: transform 0.3s ease;
+  z-index: -1;
+  filter: brightness(0.7);
+}
+
+.thumbnail-card:hover img {
+  transform: scale(1.1);
+}
+
 /* Footer stlying */
 .footer-container {
   display: flex;
@@ -250,10 +449,10 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.7rem;
-  width: 75%;
+  width: 90%;
   margin-bottom: 0.5rem;
 }
-.main-footer-content h3 {
+.main-footer-content h4 {
   font-weight: 500;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid white;
@@ -268,6 +467,9 @@ body {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+.main-footer-content ul li {
+  word-wrap: break-word;
 }
 .main-footer-content ul li a {
   text-decoration: none;
