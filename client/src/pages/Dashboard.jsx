@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import FlowChart from "../components/FlowChart";
 import { BsGraphUp, BsTools, BsCashCoin } from "react-icons/bs";
 import { MdOutlinePendingActions } from "react-icons/md";
+import { IoIosArrowForward } from "react-icons/io";
 
 function Dashboard() {
   const [selectedChecklistCategory, setSelectedChecklistCategory] = useState(0);
@@ -56,7 +57,14 @@ function Dashboard() {
             <table className="current-schedule">
               <thead>
                 <tr>
-                  <th>Current Courses</th>
+                  <th>
+                    <h3>
+                      Current Courses{" "}
+                      <IoIosArrowForward
+                        style={{ color: "rgb(136, 35, 70)", cursor: "pointer" }}
+                      />
+                    </h3>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -75,7 +83,12 @@ function Dashboard() {
               </tbody>
             </table>
             <div className="current-checklist">
-              <h3>Milestone Tracker</h3>
+              <h3>
+                Milestone Tracker{" "}
+                <IoIosArrowForward
+                  style={{ color: "rgb(136, 35, 70)", cursor: "pointer" }}
+                />
+              </h3>
               <div className="current-checklist-tabs">
                 {checklistCategories.map((checkListCategory, index) => (
                   <label
@@ -115,7 +128,9 @@ function Dashboard() {
       </div>
       <div className="pathways-cards-container">
         {/* make college life, expand your horizons, pathway to success be cards and once clicked will take them to pathways page, change pathways name to something more generic rather than college specific.  */}
-        <h2>Get the Tools to Jumpstart Your Future in CASD</h2>
+        <p className="pathways-cards-title">
+          Get the Tools to Jumpstart Your Future in CASD
+        </p>
         <div className="pathways-cards-sub-container">
           <div className="thumbnail-card">
             <img src="/assets/images/college_life_1.jpg" alt="" />

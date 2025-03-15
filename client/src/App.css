@@ -190,6 +190,16 @@ body {
 .page-title,
 .dashboard-container h2 {
   text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+  width: 90%;
+  color: rgb(136, 35, 70);
+}
+
+.page-sub-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 300;
   width: 90%;
   color: rgb(136, 35, 70);
 }
@@ -236,8 +246,9 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 95%;
-  height: 60dvh;
+  width: 100%;
+  min-height: 60dvh;
+  margin: 5rem 0;
 }
 
 .current-course-pathways-tracker {
@@ -245,9 +256,9 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 25rem;
   width: 95%;
-  max-width: 50rem;
+  max-width: 65rem;
+  flex-grow: 1;
   border: 2px solid rgb(136, 35, 70);
   border-radius: 0.7rem;
   overflow: hidden;
@@ -263,7 +274,9 @@ body {
 
 .current-course-pathways-subcontainer-title h2 {
   color: white !important;
-  margin: 0.7rem;
+  margin: 0.6rem;
+  font-size: 1.6rem;
+  font-weight: 500;
 }
 
 .current-courses-pathways-subcontainer {
@@ -271,19 +284,16 @@ body {
   flex-wrap: wrap;
   width: 100%;
   height: 100%;
+  flex-grow: 1;
 }
 
 .current-schedule {
-  flex: 1;
+  flex: 1 1 50%;
   border-collapse: collapse;
 }
 
 .current-schedule thead {
   background-color: #c5c5c5;
-}
-
-.current-schedule th {
-  padding: 0.5rem;
 }
 
 .current-schedule th,
@@ -306,11 +316,22 @@ body {
   align-items: center;
   justify-content: center;
   border-left: 2px solid rgb(136, 35, 70);
-  flex: 1;
+  flex: 1 1 50%;
 }
 
+.current-schedule h3 {
+  margin: 0.41rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
 .current-checklist h3 {
   margin: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .current-checklist-tabs {
@@ -357,10 +378,17 @@ body {
   display: flex;
   flex-direction: column;
   width: 95%;
-  min-height: 50dvh;
+  min-height: 60dvh;
   margin-bottom: 5rem;
   justify-content: center;
   align-items: center;
+}
+
+.pathways-cards-title {
+  font-size: 1.6rem;
+  font-weight: 500;
+  text-align: center;
+  color: rgb(136, 35, 70);
 }
 
 .pathways-cards-sub-container {
@@ -368,7 +396,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 3rem;
 }
 
 .thumbnail-card {
@@ -382,6 +410,8 @@ body {
 
 .thumbnail-card h2 {
   color: white;
+  font-weight: 500;
+  font-size: 1.3rem;
 }
 .thumbnail-card div {
   display: flex;
@@ -433,7 +463,55 @@ body {
   transform: scale(1.1);
 }
 
-/* Footer stlying */
+/* Courses page styling */
+.courses-container {
+  display: flex;
+  width: 100%;
+  margin-top: 4rem;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.courses-tables-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  margin-bottom: 3rem;
+}
+
+.past-courses-table {
+  width: 90%;
+  max-width: 75rem;
+  border-collapse: collapse;
+}
+
+.past-courses-table th {
+  color: rgb(136, 35, 70);
+}
+
+.past-courses-table th,
+.past-courses-table td {
+  border: 1px solid rgb(155, 155, 155);
+  padding: 12px;
+  text-align: left;
+}
+
+.past-courses-table thead {
+  background-color: #c5c5c5;
+}
+
+.past-courses-table tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.current-gpa-container {
+}
+
+/* Footer styling */
 .footer-container {
   display: flex;
   flex-direction: column;
