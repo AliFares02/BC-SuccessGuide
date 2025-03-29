@@ -1,11 +1,18 @@
-import React, { useState } from "react";
-import FlowChart from "../components/FlowChart";
-import { BsGraphUp, BsTools, BsCashCoin } from "react-icons/bs";
-import { MdOutlinePendingActions } from "react-icons/md";
+import { useEffect, useState } from "react";
+import { BsCashCoin, BsGraphUp, BsTools } from "react-icons/bs";
 import { IoIosArrowForward } from "react-icons/io";
+import { MdOutlinePendingActions } from "react-icons/md";
+import FlowChart from "../components/FlowChart";
+import axios from "axios";
 
 function Dashboard() {
   const [selectedChecklistCategory, setSelectedChecklistCategory] = useState(0);
+  // useEffect(() => {
+  //   // axios
+  //   //   .get("http://localhost:5000/api/courses/")
+  //   //   .then((response) => console.log(response.data))
+  //   //   .catch((error) => console.error(error));
+  // }, []);
   const checklistCategories = [
     "College Life",
     "Expand Your Horizons",

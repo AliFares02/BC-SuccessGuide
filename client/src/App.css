@@ -406,6 +406,7 @@ body {
   position: relative;
   border-radius: 0.7rem;
   overflow: hidden;
+  user-select: none;
 }
 
 .thumbnail-card h2 {
