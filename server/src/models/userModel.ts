@@ -23,7 +23,11 @@ const userSchema = new mongoose.Schema({
   activities: [
     {
       activityId: { type: mongoose.Schema.Types.ObjectId, ref: "Activity" },
-      isCompleted: { type: Boolean, default: false },
+      status: {
+        type: String,
+        enum: ["In progress", "Completed"],
+        default: "In progress",
+      },
       comment: { type: String },
       completedAt: { type: Date },
     },

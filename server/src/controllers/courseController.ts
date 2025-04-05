@@ -5,6 +5,9 @@ import { Request, Response } from "express";
 export async function getAllCourses(req: Request, res: Response): Promise<any> {
   try {
     const courses = await courseModel.find();
+    if (!courses || courses.length == 0) {
+      return res.status(404).json({ msg: "No courses found" });
+    }
     return res.status(200).json({ courses: courses });
   } catch (error) {
     return res.status(400).json({ error: error });
@@ -40,7 +43,7 @@ export async function getACourse(
     }
     return res.status(200).json({ msg: "Course found", course });
   } catch (error) {
-    return res.status(500).json({ msg: "Server error", error: error });
+    return res.status(500).json({ msg: "Server error", error });
   }
 }
 
@@ -70,7 +73,7 @@ export async function updateCourse(
     }
     return res.status(200).json({ msg: "Course updated" });
   } catch (error) {
-    return res.status(500).json({ msg: "Server error", error: error });
+    return res.status(500).json({ msg: "Server error", error });
   }
 }
 
@@ -87,6 +90,6 @@ export async function deleteACourse(
     }
     return res.status(200).json({ msg: "Course deleted" });
   } catch (error) {
-    return res.status(500).json({ msg: "Server error", error: error });
+    return res.status(500).json({ msg: "Server error", error });
   }
 }

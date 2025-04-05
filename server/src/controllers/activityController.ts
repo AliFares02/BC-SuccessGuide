@@ -1,4 +1,5 @@
 import activityModel from "../models/activityModel";
+import userModel from "../models/userModel";
 import { Request, Response } from "express";
 
 export async function getActivitiesBySemester(
@@ -17,7 +18,91 @@ export async function getActivitiesBySemester(
     }
     return res.status(200).json({ activities });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error", error: error });
+    res.status(500).json({ msg: "Server Error", error });
+  }
+}
+
+export async function getAllActivitiesForStudent(
+  req: Request,
+  res: Response
+): Promise<any> {
+  // first verify if user has role student
+  const semester = req.params.semester;
+  const studentId = req.params.studentId;
+  try {
+    // get all activities for the semester
+    const allActivitiesForSemester = await activityModel.find({
+      activity_semester: semester,
+    });
+    if (!allActivitiesForSemester) {
+      return res.status(404).json({ msg: "No activities for this semester" });
+    }
+
+    // return an array of the students activities(includes both completed and in progress activities)
+    const studentActivities = await userModel
+      .findById(studentId)
+      .select("activities");
+    const studentActivitiesArray = studentActivities?.activities;
+
+    if (!studentActivities) {
+      return res.status(404).json({
+        msg: "Can't find activities for this student as they do not exist",
+      });
+    }
+
+    // match the completed/in progress activities with the allactivities array based on activityid to get a filtered array that has all activities with in progress and complete ones marked accordingly
+    const studentActivityIdsAndStatus = studentActivitiesArray?.map(
+      (activity) => ({
+        activityId: activity.activityId?.toString(),
+        status: activity.status,
+      })
+    );
+
+    const combinedActivites = allActivitiesForSemester.map((activity) => {
+      const matchedActivity = studentActivityIdsAndStatus?.find(
+        (studentActivity) =>
+          studentActivity.activityId === activity._id.toString()
+      );
+
+      if (matchedActivity) {
+        return {
+          activity,
+          status: matchedActivity.status,
+        };
+      } else {
+        return {
+          activity,
+        };
+      }
+    });
+    // equivalent to code above
+    // for (let i = 0; i < allActivitiesForSemester.length; i++) {
+    //   if (
+    //     studentActivityIdsAndStatus?.some(
+    //       (activity) =>
+    //         activity.activityId === allActivitiesForSemester[i]._id.toString()
+    //     )
+    //   ) {
+    //     if (studentActivityIdsAndStatus) {
+    //       for (let j = 0; j < studentActivityIdsAndStatus.length; j++) {
+    //         if (
+    //           studentActivityIdsAndStatus?.[j]?.activityId ===
+    //           allActivitiesForSemester[i]._id.toString()
+    //         ) {
+    //           combinedActivites.push({
+    //             activity: allActivitiesForSemester[i],
+    //             status: studentActivityIdsAndStatus[j].status,
+    //           });
+    //         }
+    //       }
+    //     }
+    //   } else {
+    //     combinedActivites.push({ activity: allActivitiesForSemester[i] });
+    //   }
+    // }
+    res.status(200).json({ combinedActivites });
+  } catch (error) {
+    res.status(500).json({ msg: "Server error", error: error });
   }
 }
 
@@ -29,9 +114,7 @@ export async function createActivity(
     const activity = await activityModel.create(req.body);
     return res.status(200).json({ msg: "Activity created", activity });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ msg: "Error creating activity", error: error });
+    return res.status(400).json({ msg: "Error creating activity", error });
   }
 }
 
@@ -44,35 +127,50 @@ export async function getActivity(req: Request, res: Response): Promise<any> {
     }
     return res.status(200).json({ activity });
   } catch (error) {
-    return res.status(500).json({ msg: "Server error", error: error });
+    return res.status(500).json({ msg: "Server error", error });
   }
 }
 
-// const semester = req.body.semester;
-// const studentId = req.body.studentId;
+interface activityBody {
+  activity_description?: String;
+  activity_category?: String;
+  activity_semester?: String;
+  activity_year?: String;
+}
+export async function updateActivity(
+  req: Request<{ activityId: String }, {}, activityBody>,
+  res: Response
+): Promise<any> {
+  const activityId = req.params.activityId;
+  const activityUpdates: activityBody = req.body;
+  try {
+    const activity = await activityModel.findByIdAndUpdate(
+      activityId,
+      activityUpdates,
+      { new: true, runValidators: true }
+    );
+    if (!activity) {
+      return res.status(404).json({ msg: "Activity not found" });
+    }
+    return res.status(200).json({ msg: "Activity updated", activity });
+  } catch (error) {
+    return res.status(500).json({ msg: "Server error", error });
+  }
+}
 
-// try {
-//   // Fetch all activities for the semester
-//   const activities = await activityModel.find({ activity_semester: semester });
+export async function deleteActivity(
+  req: Request,
+  res: Response
+): Promise<any> {
+  const activityId = req.params.activityId;
 
-//   // Fetch the student's activities
-//   const student = await studentModel.findById(studentId).select('activities');
-
-//   // Map completed activities (based on activityId) to the activities
-//   const completedActivityIds = student.activities
-//     .filter(activity => activity.isCompleted)
-//     .map(activity => activity.activityId.toString());
-
-//   // Add completion info to the activity
-//   const activitiesWithCompletion = activities.map(activity => ({
-//     ...activity.toObject(),
-//     isCompleted: completedActivityIds.includes(activity._id.toString()),
-//   }));
-
-//   // Send activities to frontend
-//   res.json(activitiesWithCompletion);
-
-// } catch (error) {
-//   console.error(error);
-//   res.status(500).send('Error fetching activities');
-// }
+  try {
+    const activity = await activityModel.findByIdAndDelete(activityId);
+    if (!activity) {
+      return res.status(404).json({ msg: "Activity not found" });
+    }
+    return res.status(200).json({ msg: "Activity deleted" });
+  } catch (error) {
+    return res.status(500).json({ msg: "Server error", error });
+  }
+}
