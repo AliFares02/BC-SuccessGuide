@@ -8,21 +8,56 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   hashed_password: {
     type: String,
     required: true,
   },
-  role: {},
-  past_courses: {
-    type: [String],
+  role: { type: String, enum: ["student", "admin"], default: "student" },
+  gpa: {
+    type: Number,
+    min: 0.0,
+    max: 4.0,
   },
-  current_courses: {
-    type: [String],
-  },
+  past_courses: [
+    {
+      courseCode: { type: String, required: true },
+      grade: {
+        type: String,
+        enum: [
+          "A+",
+          "A",
+          "A-",
+          "B+",
+          "B",
+          "B-",
+          "C+",
+          "C",
+          "C-",
+          "D+",
+          "D",
+          "D-",
+          "F",
+        ],
+        maxlength: 2,
+        required: true,
+      },
+    },
+  ],
+  current_courses: [
+    {
+      courseCode: { type: String, required: true },
+      semester: { type: String, required: true },
+    },
+  ],
   activities: [
     {
-      activityId: { type: mongoose.Schema.Types.ObjectId, ref: "Activity" },
+      activityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Activity",
+        required: true,
+      },
       status: {
         type: String,
         enum: ["In progress", "Completed"],
@@ -30,6 +65,7 @@ const userSchema = new mongoose.Schema({
       },
       comment: { type: String },
       completedAt: { type: Date },
+      startedAt: { type: Date, default: Date.now },
     },
   ],
 });

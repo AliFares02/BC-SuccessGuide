@@ -6,10 +6,6 @@ import activityRouter from "./activityRouter";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({ msg: "GET hello from mainRouter" });
-});
-
 // use courses router
 router.use("/courses", coursesRouter);
 
