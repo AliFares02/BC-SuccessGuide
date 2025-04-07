@@ -4,6 +4,10 @@ import {
   login,
   addActivitiesToStudent,
   getStudentActivities,
+  addPastCourse,
+  addCurrentCourse,
+  getPastCourses,
+  getCurrentCourses,
 } from "../controllers/userController";
 
 const router = express.Router();
@@ -22,5 +26,13 @@ router.post(
 );
 
 router.get("/:studentId/student-activities", getStudentActivities);
+
+router.post("/:studentId/past-courses/add/:courseCode", addPastCourse);
+
+router.post("/:studentId/current-courses/add/:courseCode", addCurrentCourse);
+
+router.get("/:studentId/past-courses", getPastCourses);
+
+router.get("/:studentId/current-courses", getCurrentCourses);
 
 export default router;

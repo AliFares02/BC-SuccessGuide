@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   past_courses: [
     {
-      courseCode: { type: String, required: true },
+      courseCode: { type: String, required: true, unique: true },
       grade: {
         type: String,
         enum: [
@@ -43,11 +43,12 @@ const userSchema = new mongoose.Schema({
         maxlength: 2,
         required: true,
       },
+      semester: { type: String, required: true },
     },
   ],
   current_courses: [
     {
-      courseCode: { type: String, required: true },
+      courseCode: { type: String, required: true, unique: true },
       semester: { type: String, required: true },
     },
   ],
