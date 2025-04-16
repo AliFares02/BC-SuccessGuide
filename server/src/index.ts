@@ -11,7 +11,7 @@ app.use(
   cors({ origin: "http://localhost:5173", methods: "*", credentials: true })
 );
 
-// middleware
+// middleware for parsing all incoming data into readable format i.e js objects
 app.use(express.json());
 
 // main router entry point

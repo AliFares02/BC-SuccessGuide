@@ -1,18 +1,46 @@
+import { Request, Response } from "express";
 import activityModel from "../models/activityModel";
 import courseModel from "../models/courseModel";
 import userModel from "../models/userModel";
-import { Request, response, Response } from "express";
+import bcrypt from "bcrypt";
+import validator from "validator";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
+
+function createToken(_id: String) {
+  const secret = process.env.JWT_SECRET as string;
+  return jwt.sign({ _id }, secret, { expiresIn: "1d" });
+}
 
 // public endpoint
 export async function signUp(req: Request, res: Response): Promise<any> {
-  const userBody = req.body;
+  const { name, email, password } = req.body;
+  // use validatorjs for validating input
+  // validate credentials
+  if (!name || !email || !password)
+    return res.status(401).json({ msg: "Missing credentials" });
+  if (!validator.isEmail(email))
+    return res.status(401).json({ msg: "Invalid email" });
+  if (!validator.isStrongPassword(password))
+    return res.status(401).json({ msg: "Invalid password" });
+
   try {
-    const userExists = await userModel.findOne({ email: userBody.email });
+    const userExists = await userModel.findOne({ email: email });
     if (userExists)
       return res.status(409).json({ msg: "Email already in use" });
 
-    const user = await userModel.create(userBody);
-    return res.status(200).json({ msg: "User created" });
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    const user = await userModel.create({ name, email, hashed_password: hash });
+
+    const token = createToken(user._id.toString());
+    return res.status(200).json({
+      msg: "User created",
+      name: user.name,
+      email: user.email,
+      access_token: token,
+    });
   } catch (error) {
     return res.status(500).json({ msg: "Error creating user", error: error });
   }
@@ -21,17 +49,27 @@ export async function signUp(req: Request, res: Response): Promise<any> {
 // public endpoint
 export async function login(req: Request, res: Response): Promise<any> {
   const credentials = req.body;
+
+  if (!credentials.email || !credentials.password)
+    return res.status(401).json({ msg: "Missing credentials" });
   try {
     const user = await userModel.findOne({ email: credentials.email });
-    if (!user) return res.status(404).json({ msg: "User does not exist" });
+    if (!user)
+      return res
+        .status(404)
+        .json({ msg: "A user with this email does not exist" });
 
-    if (credentials.password !== user.hashed_password)
-      return res.status(401).json({ msg: "Invalid credentials" });
+    const matchingPassword = await bcrypt.compare(
+      credentials.password,
+      user.hashed_password
+    );
+    if (!matchingPassword)
+      return res.status(401).json({ msg: "Invalid password" });
 
+    const token = createToken(user._id.toString());
     return res.status(200).json({
       msg: "Login successful",
-      access_token: "Here is your access token",
-      user,
+      access_token: token,
     });
   } catch (error) {
     return res
@@ -120,7 +158,7 @@ export async function addPastCourse(req: Request, res: Response): Promise<any> {
         msg: "Can't add course because course does not exist",
       });
 
-    // check if course already exists in student past coursest
+    // check if course already exists in student past courses
     const courseExistsInPastCourses = student.past_courses.find(
       (course) => course.courseCode === courseCode.toString()
     );
@@ -186,15 +224,15 @@ export async function addCurrentCourse(
         msg: "Course already exists in either past courses or current courses",
       });
 
-    student.past_courses.push(studentsCourseDetails);
+    student.current_courses.push(studentsCourseDetails);
     await student.save();
     return res.status(200).json({
-      msg: "Course added to past courses",
-      past_courses: student?.past_courses,
+      msg: "Course added to current courses",
+      current_courses: student?.current_courses,
     });
   } catch (error) {
     return res.status(500).json({
-      msg: "Error adding course to student's past courses",
+      msg: "Error adding course to student's current courses",
       error: error,
     });
   }
