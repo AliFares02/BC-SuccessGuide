@@ -7,10 +7,43 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
-function createToken(_id: String) {
+function createToken(_id: String, role: String) {
   const secret = process.env.JWT_SECRET as string;
-  return jwt.sign({ _id }, secret, { expiresIn: "1d" });
+  return jwt.sign({ _id, role }, secret, { expiresIn: "1d" });
 }
+
+// remove any student id from params as the token is sufficient for validation bc middleware will recieve token, authenticate its signature, and bind the user id from the token to the user object and then retrieve said binded user id from user object to retrieve resources from db.
+
+// for a login, send the user id and the role from the user object you retrieve from the database(after credentials are validated), and not from the client req, to the token generator
+
+// same goes for signup except your sending the user id and role to the generator once you retrieve them from the successfully created user object
+
+// authenticateToken ex. const authenticateToken = (req, res, next) => {
+//   const token = req.headers.authorization?.split(' ')[1];
+//   if (!token) return res.status(401).json({ message: 'No token provided' });
+
+//   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+//     if (err) return res.status(403).json({ message: 'Invalid token' });
+
+//     req.user = decoded; // decoded contains id and role
+//     next();
+//   });
+// };
+
+// a isadmin middleware interceptor: function isAdmin(req, res, next) {
+//   if (req.user?.role !== 'admin') {
+//     return res.status(403).json({ message: 'Admins only' });
+//   }
+//   next();
+// }
+
+// the middleware isnt explicitly called in the protected endpoint instead you add it as a parameter to the routehandler that calls the endpoint and express will know to use that middleware to intercept all requests to that endpoint before proceeding to said endpoint: e.g router.get('/admin-dashboard', authenticateToken(another controller for authenticating the token which will be called before isAdmin), isAdmin, adminController.getDashboard);
+
+// the next() call operates via the order the functions/params are placed in the routehandler e.g router.get(). i.e authenticateToken next() -> isAdmin next() -> adminController.getDashboard.
+
+// the req, res are the same arguments that are passed down from middleware to middleware and eventually to controller
+
+// and so if a middleware modifies the req, the next middleware or controller will recieve that same modified req
 
 // public endpoint
 export async function signUp(req: Request, res: Response): Promise<any> {
@@ -34,7 +67,7 @@ export async function signUp(req: Request, res: Response): Promise<any> {
 
     const user = await userModel.create({ name, email, hashed_password: hash });
 
-    const token = createToken(user._id.toString());
+    const token = createToken(user._id.toString(), user.role);
     return res.status(200).json({
       msg: "User created",
       name: user.name,
@@ -54,21 +87,20 @@ export async function login(req: Request, res: Response): Promise<any> {
     return res.status(401).json({ msg: "Missing credentials" });
   try {
     const user = await userModel.findOne({ email: credentials.email });
-    if (!user)
-      return res
-        .status(404)
-        .json({ msg: "A user with this email does not exist" });
+    if (!user) return res.status(404).json({ msg: "Invalid credentials" });
 
     const matchingPassword = await bcrypt.compare(
       credentials.password,
       user.hashed_password
     );
     if (!matchingPassword)
-      return res.status(401).json({ msg: "Invalid password" });
+      return res.status(401).json({ msg: "Invalid credentials" });
 
-    const token = createToken(user._id.toString());
+    const token = createToken(user._id.toString(), user.role);
     return res.status(200).json({
       msg: "Login successful",
+      name: user.name,
+      email: user.email,
       access_token: token,
     });
   } catch (error) {

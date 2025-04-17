@@ -9,12 +9,9 @@ import {
   getPastCourses,
   getCurrentCourses,
 } from "../controllers/userController";
+import authenticateToken from "../middleware/authenticateToken";
 
 const router = express.Router();
-
-// router.get("/", (req, res) => {
-//   res.json({ msg: "admin router/endpoint" });
-// });
 
 router.post("/sign-up", signUp);
 
@@ -25,7 +22,11 @@ router.post(
   addActivitiesToStudent
 );
 
-router.get("/:studentId/student-activities", getStudentActivities);
+router.get(
+  "/:studentId/student-activities",
+  authenticateToken,
+  getStudentActivities
+);
 
 router.post("/:studentId/past-courses/add/:courseCode", addPastCourse);
 
