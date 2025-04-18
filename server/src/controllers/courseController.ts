@@ -28,14 +28,11 @@ export async function createCourse(req: Request, res: Response): Promise<any> {
 }
 
 // get a course
-interface CourseParams {
-  code: string;
-}
 export async function getACourse(
-  req: Request<CourseParams>,
+  req: Request<{ code: string }>,
   res: Response
 ): Promise<any> {
-  const { code } = req.params;
+  const code = req.params?.code;
   try {
     const course = await courseModel.findOne({ course_code: code });
     if (!course) {
@@ -48,7 +45,7 @@ export async function getACourse(
 }
 
 // update a course
-interface updatedCourse {
+interface UpdatedCourse {
   course_name?: string;
   course_description?: string;
   course_credits?: number;
@@ -57,16 +54,17 @@ interface updatedCourse {
   course_prerequisites?: string[];
 }
 export async function updateCourse(
-  req: Request<CourseParams, unknown, updatedCourse>,
+  req: Request<{ code: string }, unknown, UpdatedCourse>,
   res: Response
 ): Promise<any> {
-  const { code } = req.params;
+  const code = req.params?.code;
   try {
     const course = await courseModel.findOneAndUpdate(
       { course_code: code },
       {
         ...req.body,
-      }
+      },
+      { new: true, runValidators: true }
     );
     if (!course) {
       return res.status(404).json({ msg: "Course not found" });
@@ -79,10 +77,10 @@ export async function updateCourse(
 
 // delete a course
 export async function deleteACourse(
-  req: Request<CourseParams>,
+  req: Request<{ code: string }>,
   res: Response
 ): Promise<any> {
-  const { code } = req.params;
+  const code = req.params?.code;
   try {
     const course = await courseModel.findOneAndDelete({ course_code: code });
     if (!course) {

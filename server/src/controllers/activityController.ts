@@ -2,6 +2,13 @@ import activityModel from "../models/activityModel";
 import userModel from "../models/userModel";
 import { Request, Response } from "express";
 
+interface AuthenticatedRequest extends Request {
+  user?: {
+    _id: string;
+    role: string;
+  };
+}
+
 export async function getActivitiesBySemester(
   req: Request,
   res: Response
@@ -28,7 +35,7 @@ export async function getAllActivitiesForStudent(
 ): Promise<any> {
   // first verify if user has role student
   const semester = req.params.semester;
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
   try {
     // get all activities for the semester
     const allActivitiesForSemester = await activityModel.find({
@@ -75,31 +82,6 @@ export async function getAllActivitiesForStudent(
         };
       }
     });
-    // equivalent to code above
-    // for (let i = 0; i < allActivitiesForSemester.length; i++) {
-    //   if (
-    //     studentActivityIdsAndStatus?.some(
-    //       (activity) =>
-    //         activity.activityId === allActivitiesForSemester[i]._id.toString()
-    //     )
-    //   ) {
-    //     if (studentActivityIdsAndStatus) {
-    //       for (let j = 0; j < studentActivityIdsAndStatus.length; j++) {
-    //         if (
-    //           studentActivityIdsAndStatus?.[j]?.activityId ===
-    //           allActivitiesForSemester[i]._id.toString()
-    //         ) {
-    //           combinedActivites.push({
-    //             activity: allActivitiesForSemester[i],
-    //             status: studentActivityIdsAndStatus[j].status,
-    //           });
-    //         }
-    //       }
-    //     }
-    //   } else {
-    //     combinedActivites.push({ activity: allActivitiesForSemester[i] });
-    //   }
-    // }
     res.status(200).json({ combinedActivites });
   } catch (error) {
     res.status(500).json({ msg: "Server error", error: error });
@@ -132,13 +114,13 @@ export async function getActivity(req: Request, res: Response): Promise<any> {
 }
 
 interface activityBody {
-  activity_description?: String;
-  activity_category?: String;
-  activity_semester?: String;
-  activity_year?: String;
+  activity_description?: string;
+  activity_category?: string;
+  activity_semester?: string;
+  activity_year?: string;
 }
 export async function updateActivity(
-  req: Request<{ activityId: String }, {}, activityBody>,
+  req: Request<{ activityId: string }, unknown, activityBody>,
   res: Response
 ): Promise<any> {
   const activityId = req.params.activityId;

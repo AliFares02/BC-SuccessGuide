@@ -7,50 +7,19 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
-function createToken(_id: String, role: String) {
+function createToken(_id: string, role: string, department: string) {
   const secret = process.env.JWT_SECRET as string;
-  return jwt.sign({ _id, role }, secret, { expiresIn: "1d" });
+  // add user department to payload as well to avoid redudant lookup to check users department for department-level scoping
+  // also add required department field to user objects using enum with full department name as identifier
+  return jwt.sign({ _id, role, department }, secret, { expiresIn: "1d" });
 }
-
-// remove any student id from params as the token is sufficient for validation bc middleware will recieve token, authenticate its signature, and bind the user id from the token to the user object and then retrieve said binded user id from user object to retrieve resources from db.
-
-// for a login, send the user id and the role from the user object you retrieve from the database(after credentials are validated), and not from the client req, to the token generator
-
-// same goes for signup except your sending the user id and role to the generator once you retrieve them from the successfully created user object
-
-// authenticateToken ex. const authenticateToken = (req, res, next) => {
-//   const token = req.headers.authorization?.split(' ')[1];
-//   if (!token) return res.status(401).json({ message: 'No token provided' });
-
-//   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-//     if (err) return res.status(403).json({ message: 'Invalid token' });
-
-//     req.user = decoded; // decoded contains id and role
-//     next();
-//   });
-// };
-
-// a isadmin middleware interceptor: function isAdmin(req, res, next) {
-//   if (req.user?.role !== 'admin') {
-//     return res.status(403).json({ message: 'Admins only' });
-//   }
-//   next();
-// }
-
-// the middleware isnt explicitly called in the protected endpoint instead you add it as a parameter to the routehandler that calls the endpoint and express will know to use that middleware to intercept all requests to that endpoint before proceeding to said endpoint: e.g router.get('/admin-dashboard', authenticateToken(another controller for authenticating the token which will be called before isAdmin), isAdmin, adminController.getDashboard);
-
-// the next() call operates via the order the functions/params are placed in the routehandler e.g router.get(). i.e authenticateToken next() -> isAdmin next() -> adminController.getDashboard.
-
-// the req, res are the same arguments that are passed down from middleware to middleware and eventually to controller
-
-// and so if a middleware modifies the req, the next middleware or controller will recieve that same modified req
 
 // public endpoint
 export async function signUp(req: Request, res: Response): Promise<any> {
-  const { name, email, password } = req.body;
+  const { name, email, password, department } = req.body;
   // use validatorjs for validating input
   // validate credentials
-  if (!name || !email || !password)
+  if (!name || !email || !password || !department)
     return res.status(401).json({ msg: "Missing credentials" });
   if (!validator.isEmail(email))
     return res.status(401).json({ msg: "Invalid email" });
@@ -65,13 +34,19 @@ export async function signUp(req: Request, res: Response): Promise<any> {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    const user = await userModel.create({ name, email, hashed_password: hash });
+    const user = await userModel.create({
+      name,
+      email,
+      hashed_password: hash,
+      department,
+    });
 
-    const token = createToken(user._id.toString(), user.role);
+    const token = createToken(user._id.toString(), user.role, user.department);
     return res.status(200).json({
       msg: "User created",
       name: user.name,
       email: user.email,
+      department: user.department,
       access_token: token,
     });
   } catch (error) {
@@ -96,11 +71,12 @@ export async function login(req: Request, res: Response): Promise<any> {
     if (!matchingPassword)
       return res.status(401).json({ msg: "Invalid credentials" });
 
-    const token = createToken(user._id.toString(), user.role);
+    const token = createToken(user._id.toString(), user.role, user.department);
     return res.status(200).json({
       msg: "Login successful",
       name: user.name,
       email: user.email,
+      department: user.department,
       access_token: token,
     });
   } catch (error) {
@@ -110,12 +86,18 @@ export async function login(req: Request, res: Response): Promise<any> {
   }
 }
 
+interface AuthenticatedRequest extends Request {
+  user?: {
+    _id: string;
+    role: string;
+  };
+}
 // student endpoints
 export async function addActivitiesToStudent(
   req: Request,
   res: Response
 ): Promise<any> {
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
   const activityData = req.body;
 
   try {
@@ -152,7 +134,7 @@ export async function getStudentActivities(
   req: Request,
   res: Response
 ): Promise<any> {
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
 
   try {
     const student = await userModel.findById(studentId);
@@ -174,9 +156,12 @@ export async function getStudentActivities(
 }
 
 export async function addPastCourse(req: Request, res: Response): Promise<any> {
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
+  // get the course object from the database, attatch the student details(which should only contain things like course grade), then add it to students past courses instead of what your doing now.
   const courseCode = req.params.courseCode;
   const studentsCourseDetails = req.body;
+
+  // dont use coursecode from params just use it from req body or vic versa, no need to grab it from both, if you decide to grab it from both you must make sure the body code and param code match first
 
   try {
     const student = await userModel.findById(studentId);
@@ -227,10 +212,12 @@ export async function addCurrentCourse(
   req: Request,
   res: Response
 ): Promise<any> {
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
   const courseCode = req.params.courseCode;
-
+  // get the course object from the database, attatch the student details(which should only contain things like course grade), then add it to students current courses instead of what your doing now.
   const studentsCourseDetails = req.body;
+
+  // dont use coursecode from params just use it from req body or vic versa, no need to grab it from both, if you decide to grab it from both you must make sure the body code and param code match first
 
   try {
     const student = await userModel.findById(studentId);
@@ -274,7 +261,7 @@ export async function getPastCourses(
   req: Request,
   res: Response
 ): Promise<any> {
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
 
   try {
     const student = await userModel.findById(studentId).select("past_courses");
@@ -294,7 +281,7 @@ export async function getCurrentCourses(
   req: Request,
   res: Response
 ): Promise<any> {
-  const studentId = req.params.studentId;
+  const studentId = (req as AuthenticatedRequest).user?._id;
 
   try {
     const student = await userModel

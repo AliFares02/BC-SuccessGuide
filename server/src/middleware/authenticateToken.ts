@@ -5,12 +5,14 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 interface JWTPayload extends JwtPayload {
   _id: string;
   role: string;
+  department: string;
 }
 
 interface AuthenticatedRequest extends Request {
   user?: {
     _id: string;
     role: string;
+    department: string;
   };
 }
 
@@ -25,9 +27,9 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const secret = process.env.JWT_SECRET as string;
 
   try {
-    const { _id, role } = jwt.verify(token, secret) as JWTPayload;
+    const { _id, role, department } = jwt.verify(token, secret) as JWTPayload;
 
-    (req as AuthenticatedRequest).user = { _id, role };
+    (req as AuthenticatedRequest).user = { _id, role, department };
     next();
   } catch (error) {
     res.status(401).json({ msg: "Unauthorized request" });

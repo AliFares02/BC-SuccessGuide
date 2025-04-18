@@ -4,6 +4,7 @@ interface AuthenticatedRequest extends Request {
   user?: {
     _id: string;
     role: string;
+    department: string;
   };
 }
 function authenticateAdmin(req: Request, res: Response, next: NextFunction) {

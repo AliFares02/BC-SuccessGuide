@@ -15,6 +15,15 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   role: { type: String, enum: ["student", "admin"], default: "student" },
+  department: {
+    type: String,
+    enum: [
+      "Communication",
+      "Communication Sciences and Disorders",
+      "Africana Studies",
+    ],
+    required: true,
+  },
   gpa: {
     type: Number,
     min: 0.0,

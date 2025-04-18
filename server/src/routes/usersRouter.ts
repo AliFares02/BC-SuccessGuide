@@ -18,22 +18,23 @@ router.post("/sign-up", signUp);
 router.post("/login", login);
 
 router.post(
-  "/:studentId/student-activities/add-activity",
+  "/student-activities/add-activity",
+  authenticateToken,
   addActivitiesToStudent
 );
 
-router.get(
-  "/:studentId/student-activities",
+router.get("/student-activities", authenticateToken, getStudentActivities);
+
+router.post("/past-courses/add/:courseCode", authenticateToken, addPastCourse);
+
+router.post(
+  "/current-courses/add/:courseCode",
   authenticateToken,
-  getStudentActivities
+  addCurrentCourse
 );
 
-router.post("/:studentId/past-courses/add/:courseCode", addPastCourse);
+router.get("/past-courses", authenticateToken, getPastCourses);
 
-router.post("/:studentId/current-courses/add/:courseCode", addCurrentCourse);
-
-router.get("/:studentId/past-courses", getPastCourses);
-
-router.get("/:studentId/current-courses", getCurrentCourses);
+router.get("/current-courses", authenticateToken, getCurrentCourses);
 
 export default router;
