@@ -7,7 +7,6 @@ body {
   padding: 0;
 }
 body {
-  height: fit-content;
   background-image: url("/assets/images/cardboard-texture.jpg");
   background-size: contain;
   background-repeat: repeat;
@@ -22,8 +21,6 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: fit-content;
 }
 .navbar {
   position: fixed;
@@ -178,9 +175,7 @@ body {
 /* dashboard styling */
 .dashboard-container {
   display: flex;
-  width: 100%;
   margin-top: 4rem;
-  height: fit-content;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -518,7 +513,6 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
   background-color: rgb(136, 35, 70);
   color: white;
   border-top-left-radius: 0.7rem;
@@ -611,4 +605,33 @@ body {
 .handles svg:nth-child(2),
 .handles svg:nth-child(3) {
   margin-left: 1rem;
+}
+
+/* authentication page styling*/
+.authenticate-container {
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.authentication-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 75%;
+  max-width: 400px;
+  padding: 5rem 2rem;
+  gap: 2rem;
+  background-color: rgb(136, 35, 70);
+  border-radius: 10px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.authentication-form input,
+.authentication-form select {
+  padding: 0.65rem;
+  border: none;
+  outline: none;
+  border-radius: 0.3rem;
 }
