@@ -2,7 +2,6 @@
 html,
 body {
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -16,6 +15,7 @@ body {
 
 * {
   box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
 .app-container {
   position: relative;
@@ -107,22 +107,23 @@ body {
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
-.navbar li a:not(.authentication-btn):hover {
+.navbar li a:not(.logout-btn):hover {
   opacity: 0.5;
   transform: translateY(-0.2rem);
 }
 
-.authentication-btn {
+/* change to logout button */
+.logout-btn {
   background-color: white;
   text-align: center;
   color: black !important;
   padding: 0.5rem;
   margin-left: 0.5rem !important;
-  border-radius: 0.6rem;
+  border-radius: 0.2rem;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
 }
 
-.authentication-btn:hover {
+.logout-btn:hover {
   transform: translateY(-0.1rem);
   box-shadow: 0 3px 10px -1.5px rgba(0, 0, 0, 0.8);
 }
@@ -154,7 +155,7 @@ body {
     height: 225px;
     opacity: 1;
   }
-  .authentication-btn {
+  .logout-btn {
     margin: 0 0 1.5rem 0 !important;
     width: 5rem;
   }
@@ -615,17 +616,31 @@ body {
   align-items: center;
 }
 
+.dynamic-authenticate-container {
+  width: 75%;
+  max-width: 400px;
+}
+
+.authentication-form h2 {
+  margin: 0 auto;
+  margin-bottom: 1.5rem;
+}
+
 .authentication-form {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 75%;
-  max-width: 400px;
-  padding: 5rem 2rem;
-  gap: 2rem;
+  padding: 1.5rem 2rem 2rem 2rem;
   background-color: rgb(136, 35, 70);
   border-radius: 10px;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  color: #ffffff;
+}
+
+.authentication-form label {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  display: block;
 }
 
 .authentication-form input,
@@ -633,5 +648,97 @@ body {
   padding: 0.65rem;
   border: none;
   outline: none;
-  border-radius: 0.3rem;
+  border-radius: 0.2rem;
+  width: 100%;
+  background-color: aliceblue;
+}
+
+.input-div {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-div input {
+  padding-right: 2.5rem;
+  line-height: 1.6;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  color: rgb(136, 35, 70);
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.authentication-form div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.authentication-form div p {
+  margin: 0;
+}
+
+.authentication-form div button {
+  all: unset;
+  cursor: pointer;
+}
+
+.authentication-form-btn {
+  border: none;
+  text-align: center;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: aliceblue;
+  color: rgb(136, 35, 70);
+  margin: 0.5rem 0;
+  border-radius: 0.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+}
+
+.authentication-form-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.authentication-form-btn:disabled:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.authentication-form-btn:hover {
+  transform: translateY(-0.1rem);
+  box-shadow: 0 3px 10px -1.5px rgba(0, 0, 0, 0.8);
+}
+
+.error {
+  color: #f44336;
+  display: block !important;
+  text-align: center;
+  padding: 0.2rem;
+  background-color: #f8d7da;
+  border: 1px solid #f44336;
+  border-radius: 0.2rem;
+}
+
+.spinner {
+  font-size: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

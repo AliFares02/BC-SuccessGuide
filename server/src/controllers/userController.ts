@@ -9,16 +9,13 @@ import "dotenv/config";
 
 function createToken(_id: string, role: string, department: string) {
   const secret = process.env.JWT_SECRET as string;
-  // add user department to payload as well to avoid redudant lookup to check users department for department-level scoping
-  // also add required department field to user objects using enum with full department name as identifier
   return jwt.sign({ _id, role, department }, secret, { expiresIn: "1d" });
 }
 
 // public endpoint
 export async function signUp(req: Request, res: Response): Promise<any> {
   const { name, email, password, department } = req.body;
-  // use validatorjs for validating input
-  // validate credentials
+
   if (!name || !email || !password || !department)
     return res.status(401).json({ msg: "Missing credentials" });
   if (!validator.isEmail(email))

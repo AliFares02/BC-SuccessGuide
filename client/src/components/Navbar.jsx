@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import useLogout from "../hooks/useLogout";
 
 function Navbar() {
   const [burgerClicked, setBurgerClicked] = useState(false);
+  const { logout } = useLogout();
+  // for displaying user info in the navbar
+  // const {user} = useUserContext();
+
+  function handleLogout() {
+    setBurgerClicked(!burgerClicked);
+    logout();
+  }
   return (
     <nav className="navbar">
       <h1 className="logo">
@@ -45,12 +54,8 @@ function Navbar() {
           </Link>
         </li>
         <li>
-          <Link
-            to="/authentication"
-            className="authentication-btn"
-            onClick={() => setBurgerClicked(!burgerClicked)}
-          >
-            Log in
+          <Link className="logout-btn" onClick={handleLogout}>
+            Log out
           </Link>
         </li>
       </ul>

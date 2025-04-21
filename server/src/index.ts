@@ -8,7 +8,12 @@ const app = express();
 
 //cors configuration
 app.use(
-  cors({ origin: "http://localhost:5173", methods: "*", credentials: true })
+  cors({
+    origin: "http://localhost:5173",
+    methods: "*",
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
 // middleware for parsing all incoming data into readable format i.e js objects
