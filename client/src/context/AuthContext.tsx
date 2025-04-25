@@ -1,13 +1,17 @@
+import { jwtDecode } from "jwt-decode";
 import {
   createContext,
-  useReducer,
   Dispatch,
   ReactNode,
   useEffect,
+  useReducer,
 } from "react";
 
 type AuthUser = {
   access: string;
+  email: string;
+  role: string;
+  department: string;
 };
 
 type AuthState = {
@@ -50,8 +54,14 @@ type AuthProviderProps = {
   children: ReactNode;
 };
 
+type JwtPayload = {
+  email: string;
+  role: string;
+  department: string;
+};
+
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
-  // userReducer calls authReducer and authReducer returns the new state(with a new user field in this case), in the return line above, to the state object destructured from the hook below i.e const [ -> state, dispatch] = ..., then this new state object is passed to child components in the return statement below
+  // useReducer calls authReducer and authReducer returns the new state(with a new user field in this case), in the return line above, to the state object destructured from the hook below i.e const [ -> state, dispatch] = ..., then this new state object is passed to child components in the return statement below
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     tkFetchLoading: true,
@@ -62,11 +72,19 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const token = localStorage.getItem("access");
     if (token) {
-      dispatch({ type: "LOGIN", payload: { access: token } });
+      const { email, role, department } = jwtDecode<JwtPayload>(token);
+      dispatch({
+        type: "LOGIN",
+        payload: { access: token, email, role, department },
+      });
     } else {
       dispatch({ type: "AUTH_READY" });
     }
   }, []);
+
+  if (state.tkFetchLoading) {
+    return <div className="splash-screen"></div>;
+  }
 
   return (
     <AuthContext.Provider value={{ ...state, dispatch }}>

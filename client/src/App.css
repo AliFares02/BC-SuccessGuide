@@ -116,10 +116,15 @@ body {
 .logout-btn {
   background-color: white;
   text-align: center;
-  color: black !important;
+  color: rgb(136, 35, 70) !important;
+  font-weight: 500;
   padding: 0.5rem;
   margin-left: 0.5rem !important;
-  border-radius: 0.2rem;
+  margin-right: 0.55rem !important;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 0.5rem;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
 }
 
@@ -202,11 +207,60 @@ body {
 
 .react-flow {
   border: 1px solid rgb(155, 155, 155);
+  border-radius: 0.6rem;
+  position: relative;
 }
 
-.react-flow__node {
-  border: none !important;
-  color: black !important;
+.flowchart-course-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.course-node {
+  padding: 10px;
+  border-radius: 0.7rem;
+  width: 10rem;
+  height: fit-content;
+  background: #ecf0f1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.course-node.completed {
+  border: 1px solid rgb(2, 187, 2);
+}
+
+.course-node.completed::before {
+  content: "✅";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 0.8rem;
+}
+
+.course-node:hover {
+  background: #d4d7d8;
+}
+
+.course-node strong {
+  font-weight: 500;
+}
+
+.course-node-desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.5rem;
 }
 
 .outlook-stats-section {
@@ -255,9 +309,9 @@ body {
   width: 95%;
   max-width: 65rem;
   flex-grow: 1;
-  border: 2px solid rgb(136, 35, 70);
   border-radius: 0.7rem;
   overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
 
 .current-course-pathways-subcontainer-title {
@@ -283,6 +337,13 @@ body {
   flex-grow: 1;
 }
 
+/* @media (max-width: 481px) {
+  .current-checklist {
+    border-left: none !important;
+    border-top: 2px solid rgb(136, 35, 70) !important;
+  }
+} */
+
 .current-schedule {
   flex: 1 1 50%;
   border-collapse: collapse;
@@ -292,17 +353,30 @@ body {
   background-color: #c5c5c5;
 }
 
+.current-schedule thead th {
+  background-color: #b9b9b9;
+  padding: 0;
+}
+
+.current-schedule tbody tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.current-schedule tbody tr:nth-child(odd) {
+  background-color: #cfcfcf;
+}
+
 .current-schedule th,
-.current-schedule td {
-  border: 1px solid rgb(155, 155, 155);
+.current-schedule tr {
+  border-bottom: 1px solid rgb(155, 155, 155);
+}
+
+.current-schedule tbody tr:last-child {
+  border-bottom: none !important;
 }
 
 .current-schedule td {
   padding-left: 1rem;
-}
-
-.current-schedule tr:nth-child(even) {
-  background-color: #dddddd;
 }
 
 .current-checklist {
@@ -311,30 +385,31 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-left: 2px solid rgb(136, 35, 70);
+  border-left: 1px solid rgb(136, 35, 70);
   flex: 1 1 50%;
+  background-color: #b9b9b9;
 }
 
 .current-schedule h3 {
-  margin: 0.41rem;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
 }
 .current-checklist h3 {
-  margin: 0.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .current-checklist-tabs {
   display: flex;
   justify-content: center;
   width: 100%;
-  border-top: 1px solid #8d8c8c;
+  border-top: 0.5px solid #8d8c8c;
 }
 
 .checkList-category {
@@ -361,7 +436,6 @@ body {
   width: 100%;
   flex-grow: 1;
   background-color: #ffffff;
-  border: 1px solid #ddd;
   border-top-color: #8d8c8c;
 }
 
@@ -373,7 +447,7 @@ body {
 .pathways-cards-container {
   display: flex;
   flex-direction: column;
-  width: 95%;
+  width: 100%;
   min-height: 60dvh;
   margin-bottom: 5rem;
   justify-content: center;
@@ -392,15 +466,13 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 3rem;
 }
 
 .thumbnail-card {
-  display: block;
-  width: 15rem;
+  flex: 1;
+  min-width: 15rem;
   height: 20rem;
   position: relative;
-  border-radius: 0.7rem;
   overflow: hidden;
   user-select: none;
 }
@@ -609,16 +681,29 @@ body {
 }
 
 /* authentication page styling*/
+.authentication-page-main-logo {
+  color: rgb(136, 35, 70);
+  font-size: 2.25rem;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  padding-top: 1rem;
+}
+
 .authenticate-container {
   height: 100dvh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
 }
 
 .dynamic-authenticate-container {
-  width: 75%;
-  max-width: 400px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
 }
 
 .authentication-form h2 {
@@ -628,6 +713,7 @@ body {
 
 .authentication-form {
   display: flex;
+  width: 80%;
   flex-direction: column;
   justify-content: center;
   padding: 1.5rem 2rem 2rem 2rem;
@@ -653,12 +739,16 @@ body {
   background-color: aliceblue;
 }
 
+.authentication-form select {
+  cursor: pointer;
+}
+
 .input-div {
   position: relative;
   margin-bottom: 1rem;
 }
 
-.input-div input {
+.input-div #password {
   padding-right: 2.5rem;
   line-height: 1.6;
 }
@@ -720,6 +810,33 @@ body {
 .authentication-form-btn:hover {
   transform: translateY(-0.1rem);
   box-shadow: 0 3px 10px -1.5px rgba(0, 0, 0, 0.8);
+}
+
+.splash-screen {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  position: fixed;
+  inset: 0;
+}
+
+.splash-screen::before {
+  content: "BC SuccessGuide";
+  font-size: 2.25rem;
+  font-weight: bold;
+  color: rgb(136, 35, 70);
+  animation: logoSlowBlink 1.8s ease-in-out infinite;
+}
+
+@keyframes logoSlowBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 .error {

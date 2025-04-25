@@ -3,6 +3,7 @@ import {
   signUp,
   login,
   addActivitiesToStudent,
+  getStudentAcademicTracker,
   getStudentActivities,
   addPastCourse,
   addCurrentCourse,
@@ -23,15 +24,13 @@ router.post(
   addActivitiesToStudent
 );
 
+router.get("/academic-tracker", authenticateToken, getStudentAcademicTracker);
+
 router.get("/student-activities", authenticateToken, getStudentActivities);
 
 router.post("/past-courses/add/:courseCode", authenticateToken, addPastCourse);
 
-router.post(
-  "/current-courses/add/:courseCode",
-  authenticateToken,
-  addCurrentCourse
-);
+router.post("/current-courses/add", authenticateToken, addCurrentCourse);
 
 router.get("/past-courses", authenticateToken, getPastCourses);
 

@@ -7,9 +7,16 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
-function createToken(_id: string, role: string, department: string) {
+function createToken(
+  _id: string,
+  email: string,
+  role: string,
+  department: string
+) {
   const secret = process.env.JWT_SECRET as string;
-  return jwt.sign({ _id, role, department }, secret, { expiresIn: "1d" });
+  return jwt.sign({ _id, email, role, department }, secret, {
+    expiresIn: "1d",
+  });
 }
 
 // public endpoint
@@ -38,7 +45,12 @@ export async function signUp(req: Request, res: Response): Promise<any> {
       department,
     });
 
-    const token = createToken(user._id.toString(), user.role, user.department);
+    const token = createToken(
+      user._id.toString(),
+      user.email,
+      user.role,
+      user.department
+    );
     return res.status(200).json({
       msg: "User created",
       name: user.name,
@@ -68,7 +80,12 @@ export async function login(req: Request, res: Response): Promise<any> {
     if (!matchingPassword)
       return res.status(401).json({ msg: "Invalid credentials" });
 
-    const token = createToken(user._id.toString(), user.role, user.department);
+    const token = createToken(
+      user._id.toString(),
+      user.email,
+      user.role,
+      user.department
+    );
     return res.status(200).json({
       msg: "Login successful",
       name: user.name,
@@ -122,6 +139,31 @@ export async function addActivitiesToStudent(
   } catch (error) {
     return res.status(500).json({
       msg: "Error adding activity, please try again later",
+      error: error,
+    });
+  }
+}
+
+export async function getStudentAcademicTracker(
+  req: Request,
+  res: Response
+): Promise<any> {
+  const studentId = (req as AuthenticatedRequest).user?._id;
+
+  try {
+    const student = await userModel
+      .findById(studentId)
+      .populate("activities.activityId");
+    if (!student) return res.status(404).json({ msg: "Student not found" });
+
+    const studentCurrentCourses = student.current_courses;
+
+    return res
+      .status(200)
+      .json({ studentCurrentCourses, activities: student.activities });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Error retrieving student academic tracker, please try again later",
       error: error,
     });
   }
@@ -210,11 +252,15 @@ export async function addCurrentCourse(
   res: Response
 ): Promise<any> {
   const studentId = (req as AuthenticatedRequest).user?._id;
-  const courseCode = req.params.courseCode;
   // get the course object from the database, attatch the student details(which should only contain things like course grade), then add it to students current courses instead of what your doing now.
-  const studentsCourseDetails = req.body;
+  const { courseCode, semester } = req.body;
 
   // dont use coursecode from params just use it from req body or vic versa, no need to grab it from both, if you decide to grab it from both you must make sure the body code and param code match first
+
+  // implement server side logic to check the current semester
+
+  if (!semester)
+    return res.status(400).json({ msg: "Invalid or missing semester" });
 
   try {
     const student = await userModel.findById(studentId);
@@ -240,7 +286,7 @@ export async function addCurrentCourse(
         msg: "Course already exists in either past courses or current courses",
       });
 
-    student.current_courses.push(studentsCourseDetails);
+    student.current_courses.push({ courseCode, semester });
     await student.save();
     return res.status(200).json({
       msg: "Course added to current courses",

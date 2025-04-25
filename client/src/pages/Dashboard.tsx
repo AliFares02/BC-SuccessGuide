@@ -4,32 +4,105 @@ import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlinePendingActions } from "react-icons/md";
 import FlowChart from "../components/FlowChart";
 import axios from "axios";
+import useAuthContext from "../hooks/useAuthContext";
 
 function Dashboard() {
-  const [selectedChecklistCategory, setSelectedChecklistCategory] = useState(0);
-  // useEffect(() => {
-  //   // axios
-  //   //   .get("http://localhost:5000/api/courses/")
-  //   //   .then((response) => console.log(response.data))
-  //   //   .catch((error) => console.error(error));
-  // }, []);
-  const checklistCategories = [
+  const [currentCourses, setCurrentCourses] = useState([]);
+  const [flowchartCourses, setFlowchartCourses] = useState([]);
+  const [selectedActivityCategory, setSelectedActivityCategory] =
+    useState("College Life");
+  const activityCategories = [
     "College Life",
     "Expand Your Horizons",
     "Pathway to Success",
   ];
-  const checkListCategoryTasks = {
-    0: [
-      "Create a Handshake account",
-      "Visit the Learning Center to see how it can help you achieve academic success",
-    ],
-    1: ["Create a draft résumé or start building a basic résumé"],
-    2: ["Not sure what career(s) interest you? Check out MyNextMove"],
-  };
+  const [semesterActivities, setSemesterActivities] = useState<{
+    [key: string]: Activity[];
+  }>({});
+  const { user, tkFetchLoading } = useAuthContext();
+
+  useEffect(() => {
+    fetchUserDashboard();
+  }, []);
+
+  async function fetchUserDashboard() {
+    if (!tkFetchLoading) {
+      if (user?.access) {
+        const flowChartDataReq = axios.get(
+          "http://localhost:5000/api/courses/",
+          {
+            headers: {
+              Authorization: `Bearer ${user?.access}`,
+            },
+          }
+        );
+        const academicTrackerReq = axios.get(
+          "http://localhost:5000/api/users/academic-tracker",
+          {
+            headers: {
+              Authorization: `Bearer ${user?.access}`,
+            },
+          }
+        );
+        axios
+          .all([flowChartDataReq, academicTrackerReq])
+          .then(
+            axios.spread((flowChartDataRes, academicTrackerRes) => {
+              setFlowchartCourses(flowChartDataRes.data?.courses);
+              setCurrentCourses(academicTrackerRes.data?.studentCurrentCourses);
+              parseActivities(academicTrackerRes.data?.activities);
+            })
+          )
+          .catch((error) => console.error(error));
+      }
+    }
+  }
+  // if (flowchartCourses.length > 0)
+  //   console.log("flowchartCourses", flowchartCourses);
+
+  interface Activity {
+    activityId: {
+      activity_category: string;
+      activity_description: string;
+      activity_semester: string;
+      activity_year: string;
+    };
+    completedAt?: string;
+    startedAt: string;
+    status: string;
+  }
+
+  interface GroupedActivities {
+    [category: string]: Activity[];
+  }
+
+  function parseActivities(activities: Activity[]) {
+    const activitiesGroupedByCategory = activities.reduce<GroupedActivities>(
+      (acc, activity) => {
+        const category = activity?.activityId?.activity_category;
+
+        if (!category) return acc;
+
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+
+        acc[category].push(activity);
+
+        return acc;
+      },
+      {}
+    );
+    // console.log("activitiesGroupedByCategory", activitiesGroupedByCategory);
+
+    setSemesterActivities(activitiesGroupedByCategory);
+  }
+  console.log("dashboard is rerendered");
+
   return (
     <div className="dashboard-container">
       <h1 className="page-title">My Communication Flowchart</h1>
-      <FlowChart />
+      <FlowChart flowchartCourses={flowchartCourses} />
       <div className="outlook-stats-section">
         <h2>You should know</h2>
         <div>
@@ -75,18 +148,21 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>ENGL 1010</td>
-                </tr>
-                <tr>
-                  <td>COMM 2000</td>
-                </tr>
-                <tr>
-                  <td>COMM 3000</td>
-                </tr>
-                <tr>
-                  <td>COMM 3100</td>
-                </tr>
+                {currentCourses && currentCourses.length > 0 ? (
+                  (currentCourses as { courseCode: string }[]).map(
+                    (course, idx) => (
+                      <tr key={idx}>
+                        <td>{course.courseCode}</td>
+                      </tr>
+                    )
+                  )
+                ) : (
+                  <tr>
+                    <td colSpan={1} style={{ textAlign: "center" }}>
+                      No courses this semester
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
             <div className="current-checklist">
@@ -97,34 +173,37 @@ function Dashboard() {
                 />
               </h3>
               <div className="current-checklist-tabs">
-                {checklistCategories.map((checkListCategory, index) => (
+                {activityCategories.map((activityCategory, index) => (
                   <label
                     className={`checkList-category ${
-                      selectedChecklistCategory === index ? "selected" : ""
+                      selectedActivityCategory === activityCategory
+                        ? "selected"
+                        : ""
                     }`}
                     key={index}
-                    onClick={() => setSelectedChecklistCategory(index)}
+                    onClick={() =>
+                      setSelectedActivityCategory(activityCategory)
+                    }
                   >
-                    {checkListCategory}
+                    {activityCategory}
                   </label>
                 ))}
               </div>
               <div className="current-checklist-tabs-categories">
                 <ul>
-                  {checkListCategoryTasks[selectedChecklistCategory].length >
-                  0 ? (
-                    checkListCategoryTasks[selectedChecklistCategory].map(
-                      (checkListCategoryTask, index) => (
-                        <li key={index}>
+                  {semesterActivities[selectedActivityCategory]?.length > 0 ? (
+                    semesterActivities[selectedActivityCategory].map(
+                      (activity, idx) => (
+                        <li key={idx}>
                           <MdOutlinePendingActions
                             style={{ color: "rgb(136, 35, 70)" }}
                           />
-                          {checkListCategoryTask}
+                          {activity.activityId.activity_description}
                         </li>
                       )
                     )
                   ) : (
-                    <li>No tasks in progress</li>
+                    <li>No activities for this category</li>
                   )}
                 </ul>
               </div>

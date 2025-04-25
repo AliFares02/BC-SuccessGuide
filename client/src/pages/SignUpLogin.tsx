@@ -17,14 +17,16 @@ function SignUpLogin() {
     password: "",
     department: "",
   });
-  const { signUp, signUpError, signUpLoading } = useSignUp();
-  const { login, loginError, loginLoading } = useLogIn();
+  const { signUp, signUpError, setSignUpError, signUpLoading } = useSignUp();
+  const { login, loginError, setLoginError, loginLoading } = useLogIn();
 
   useEffect(() => {
     if (authenticationOption === "login") {
       setSignupValues({ name: "", email: "", password: "", department: "" });
+      setSignUpError(null);
     } else {
       setLoginValues({ email: "", password: "" });
+      setLoginError(null);
     }
     setShowPassword(false);
   }, [authenticationOption]);
@@ -32,7 +34,6 @@ function SignUpLogin() {
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     await login(loginValues);
-    if (loginError) console.log(loginError);
   }
 
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
@@ -41,6 +42,7 @@ function SignUpLogin() {
   }
   return (
     <div className="authenticate-container">
+      <h1 className="authentication-page-main-logo">BC SuccessGuide</h1>
       <div className="dynamic-authenticate-container">
         {authenticationOption === "login" ? (
           <form onSubmit={handleLogin} className="authentication-form">
@@ -84,7 +86,7 @@ function SignUpLogin() {
               className="authentication-form-btn"
               type="submit"
             >
-              Log in
+              {loginLoading ? <CgSpinner className="spinner" /> : "Log in"}
             </button>
             <div>
               <button>Forgot Password?</button>

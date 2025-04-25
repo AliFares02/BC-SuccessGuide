@@ -7,6 +7,7 @@ const activitySchema = new mongoose.Schema({
   },
   activity_category: {
     type: String,
+    enum: ["College Life", "Expand Your Horizons", "Pathway to Success"],
     required: true,
   },
   activity_semester: {

@@ -1,7 +1,9 @@
 import React from "react";
 import { useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import useAuthContext from "./useAuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 type SignUpObject = {
   name: string;
@@ -10,10 +12,18 @@ type SignUpObject = {
   department: string;
 };
 
+type JwtPayload = {
+  email: string;
+  role: string;
+  department: string;
+};
+
 function useSignUp() {
   const [signUpError, setSignUpError] = useState<string | null>(null);
   const [signUpLoading, setSignUpLoading] = useState(false);
   const { dispatch } = useAuthContext();
+
+  const navigate = useNavigate();
 
   async function signUp(signUpValues: SignUpObject) {
     setSignUpError(null);
@@ -41,12 +51,20 @@ function useSignUp() {
         })
         .then((response) => {
           localStorage.setItem("access", response?.data?.access_token);
+          const { email, role, department } = jwtDecode<JwtPayload>(
+            response?.data?.access_token
+          );
           dispatch({
             type: "LOGIN",
             payload: {
               access: response?.data?.access_token,
+              email,
+              role,
+              department,
             },
           });
+          // temporary navigation. navigation should be done after code that invokes signup hook.
+          navigate("/");
         })
         .catch((error) => setSignUpError(error?.response?.data?.msg))
         .finally(() => {
@@ -54,7 +72,7 @@ function useSignUp() {
         });
     }
   }
-  return { signUp, signUpError, signUpLoading };
+  return { signUp, signUpError, setSignUpError, signUpLoading };
 }
 
 export default useSignUp;

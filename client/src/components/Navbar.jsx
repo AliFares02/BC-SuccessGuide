@@ -54,9 +54,9 @@ function Navbar() {
           </Link>
         </li>
         <li>
-          <Link className="logout-btn" onClick={handleLogout}>
+          <button className="logout-btn" onClick={handleLogout}>
             Log out
-          </Link>
+          </button>
         </li>
       </ul>
     </nav>
