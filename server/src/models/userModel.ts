@@ -1,6 +1,45 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 
-const userSchema = new mongoose.Schema({
+interface User extends Document {
+  _id: Types.ObjectId;
+  name: string;
+  email: string;
+  hashed_password: string;
+  role: "student" | "admin";
+  department:
+    | "Communication"
+    | "Communication Sciences and Disorders"
+    | "Africana Studies";
+  gpa?: number;
+  courses?: {
+    courseCode: string;
+    semester: string;
+    status: "taken" | "in-progress";
+    grade?:
+      | "A+"
+      | "A"
+      | "A-"
+      | "B+"
+      | "B"
+      | "B-"
+      | "C+"
+      | "C"
+      | "C-"
+      | "D+"
+      | "D"
+      | "D-"
+      | "F";
+  }[];
+  activities?: {
+    activityId: mongoose.Types.ObjectId;
+    status: "in-progress" | "completed";
+    comment?: string;
+    completedAt?: Date;
+    startedAt?: Date;
+  }[];
+}
+
+const userSchema = new mongoose.Schema<User>({
   name: {
     type: String,
     required: true,
@@ -29,9 +68,15 @@ const userSchema = new mongoose.Schema({
     min: 0.0,
     max: 4.0,
   },
-  past_courses: [
+  courses: [
     {
-      courseCode: { type: String, required: true },
+      courseCode: { type: String, requried: true },
+      semester: { type: String, required: true },
+      status: {
+        type: String,
+        enum: ["taken", "in-progress"],
+        required: true,
+      },
       grade: {
         type: String,
         enum: [
@@ -50,15 +95,10 @@ const userSchema = new mongoose.Schema({
           "F",
         ],
         maxlength: 2,
-        required: true,
+        required: function (this: { status: string }) {
+          return this.status === "taken";
+        },
       },
-      semester: { type: String, required: true },
-    },
-  ],
-  current_courses: [
-    {
-      courseCode: { type: String, required: true },
-      semester: { type: String, required: true },
     },
   ],
   activities: [
@@ -70,8 +110,8 @@ const userSchema = new mongoose.Schema({
       },
       status: {
         type: String,
-        enum: ["In progress", "Completed"],
-        default: "In progress",
+        enum: ["in-progress", "completed"],
+        default: "in-progress",
       },
       comment: { type: String },
       completedAt: { type: Date },
@@ -80,4 +120,4 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model<User>("User", userSchema);

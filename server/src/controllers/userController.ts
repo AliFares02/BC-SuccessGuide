@@ -121,7 +121,7 @@ export async function addActivitiesToStudent(
     if (!activity) return res.status(404).json({ msg: "Invalid activity" });
 
     // check if activity already exists in students activities before adding it
-    const activityExists = student.activities.find(
+    const activityExists = student.activities?.find(
       (activity) =>
         activity.activityId.toString() === activityData.activityId.toString()
     );
@@ -130,7 +130,7 @@ export async function addActivitiesToStudent(
         .status(409)
         .json({ msg: "Activity already exists in students activity list" });
 
-    student.activities.push(activityData);
+    student.activities?.push(activityData);
 
     await student.save();
     return res.status(200).json({
@@ -156,7 +156,9 @@ export async function getStudentAcademicTracker(
       .populate("activities.activityId");
     if (!student) return res.status(404).json({ msg: "Student not found" });
 
-    const studentCurrentCourses = student.current_courses;
+    const studentCurrentCourses = student.courses?.filter(
+      (course) => course.status === "in-progress"
+    );
 
     return res
       .status(200)
@@ -215,29 +217,42 @@ export async function addPastCourse(req: Request, res: Response): Promise<any> {
       });
 
     // check if course already exists in student past courses
-    const courseExistsInPastCourses = student.past_courses.find(
-      (course) => course.courseCode === courseCode.toString()
-    );
-    const courseExistsInCurrentCourses = student.current_courses.find(
-      (course) => course.courseCode === courseCode.toString()
-    );
-    if (courseExistsInPastCourses)
+    const courseAlrTaken = student.courses?.find((course) => {
+      return (
+        course.courseCode === courseCode.toString() && course.status === "taken"
+      );
+    });
+    const courseAlrInProg = student.courses?.find((course) => {
+      return (
+        course.courseCode === courseCode.toString() &&
+        course.status === "in-progress"
+      );
+    });
+    if (courseAlrTaken)
       return res.status(409).json({
-        msg: "Course already exists in past courses",
+        msg: "Course already taken before",
       });
-    // if it exists in current courses, then it is being moved from current courses to past courses so first remove it from current courses
-    if (courseExistsInCurrentCourses) {
-      const courseIdx = student.current_courses.findIndex(
+    // if it is already in progress, then change the course from "in-progress" to "taken"
+    if (courseAlrInProg) {
+      const courseIdx = student.courses?.findIndex(
         (course) => course.courseCode === courseCode.toString()
       );
-      if (courseIdx !== -1) student.current_courses.splice(courseIdx, 1);
+      if (courseIdx !== undefined && courseIdx !== -1) {
+        student.courses![courseIdx].status = "taken";
+        student.courses![courseIdx].grade = studentsCourseDetails.grade;
+      }
+    } else {
+      // else add the course as a "taken" course
+      student.courses?.push({
+        courseCode,
+        semester: studentsCourseDetails.semester,
+        status: "taken",
+        grade: studentsCourseDetails.grade,
+      });
     }
-
-    student.past_courses.push(studentsCourseDetails);
     await student.save();
     return res.status(200).json({
       msg: "Course added to past courses",
-      past_courses: student?.past_courses,
     });
   } catch (error) {
     return res.status(500).json({
@@ -274,23 +289,27 @@ export async function addCurrentCourse(
         msg: "Can't add course because course does not exist",
       });
 
-    // check if course already exists in student past courses
-    const courseExistsInPastCourses = student.past_courses.find(
-      (course) => course.courseCode === courseCode.toString()
-    );
-    const courseExistsInCurrentCourses = student.current_courses.find(
-      (course) => course.courseCode === courseCode.toString()
-    );
-    if (courseExistsInCurrentCourses || courseExistsInPastCourses)
+    // check if course already exists in student taken courses
+    const courseAlrTaken = student.courses?.find((course) => {
+      return (
+        course.courseCode === courseCode.toString() && course.status === "taken"
+      );
+    });
+    const courseAlrInProg = student.courses?.find((course) => {
+      return (
+        course.courseCode === courseCode.toString() &&
+        course.status === "in-progress"
+      );
+    });
+    if (courseAlrTaken || courseAlrInProg)
       return res.status(409).json({
-        msg: "Course already exists in either past courses or current courses",
+        msg: "Course previously taken or currently in-progress",
       });
 
-    student.current_courses.push({ courseCode, semester });
+    student.courses?.push({ courseCode, semester, status: "in-progress" });
     await student.save();
     return res.status(200).json({
       msg: "Course added to current courses",
-      current_courses: student?.current_courses,
     });
   } catch (error) {
     return res.status(500).json({
@@ -307,12 +326,15 @@ export async function getPastCourses(
   const studentId = (req as AuthenticatedRequest).user?._id;
 
   try {
-    const student = await userModel.findById(studentId).select("past_courses");
+    const student = await userModel.findById(studentId);
     if (!student)
       return res.status(404).json({
         msg: "Can't retrieve student courses because student does not exist",
       });
-    return res.status(200).json({ past_courses: student.past_courses });
+    const studentPastCourses = student.courses?.filter(
+      (course) => course.status === "taken"
+    );
+    return res.status(200).json({ past_courses: studentPastCourses });
   } catch (error) {
     return res.status(500).json({
       msg: "Error retrieving student's past courses",
@@ -327,14 +349,16 @@ export async function getCurrentCourses(
   const studentId = (req as AuthenticatedRequest).user?._id;
 
   try {
-    const student = await userModel
-      .findById(studentId)
-      .select("current_courses");
+    const student = await userModel.findById(studentId);
     if (!student)
       return res.status(404).json({
         msg: "Can't retrieve student courses because student does not exist",
       });
-    return res.status(200).json({ current_courses: student.current_courses });
+
+    const studentCurrCourses = student.courses?.filter(
+      (course) => course.status === "in-progress"
+    );
+    return res.status(200).json({ current_courses: studentCurrCourses });
   } catch (error) {
     return res.status(500).json({
       msg: "Error retrieving student's current courses",

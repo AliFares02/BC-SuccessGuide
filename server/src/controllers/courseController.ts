@@ -1,10 +1,20 @@
 import courseModel from "../models/courseModel";
 import { Request, Response } from "express";
 
+interface AuthenticatedRequest extends Request {
+  user?: {
+    _id: string;
+    role: string;
+    department: string;
+  };
+}
 // get all courses
 export async function getAllCourses(req: Request, res: Response): Promise<any> {
+  const departmentFilter = (req as AuthenticatedRequest).user?.department;
   try {
-    const courses = await courseModel.find();
+    const courses = await courseModel.find({
+      course_department: departmentFilter,
+    });
     if (!courses || courses.length == 0) {
       return res.status(404).json({ msg: "No courses found" });
     }

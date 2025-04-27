@@ -1,13 +1,11 @@
-import { useReactFlow, Handle, Position } from "@xyflow/react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import React, { useState } from "react";
 
 type Course = {
   course_code: string;
   course_credits: string;
   course_department: string;
   course_description: string;
-  course_difficulty: string;
   course_name: string;
   course_prerequisites: string[];
 };

@@ -97,7 +97,6 @@ function Dashboard() {
 
     setSemesterActivities(activitiesGroupedByCategory);
   }
-  console.log("dashboard is rerendered");
 
   return (
     <div className="dashboard-container">
