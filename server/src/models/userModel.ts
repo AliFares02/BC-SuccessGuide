@@ -10,6 +10,7 @@ interface User extends Document {
     | "Communication"
     | "Communication Sciences and Disorders"
     | "Africana Studies";
+  year?: "First" | "Second" | "Third" | "Fourth";
   gpa?: number;
   courses?: {
     courseCode: string;
@@ -37,12 +38,16 @@ interface User extends Document {
     completedAt?: Date;
     startedAt?: Date;
   }[];
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 const userSchema = new mongoose.Schema<User>({
   name: {
     type: String,
-    required: true,
+    required: function (this: { role: string }) {
+      return this.role === "student";
+    },
   },
   email: {
     type: String,
@@ -62,6 +67,16 @@ const userSchema = new mongoose.Schema<User>({
       "Africana Studies",
     ],
     required: true,
+  },
+  year: {
+    type: String,
+    enum: ["First", "Second", "Third", "Fourth"],
+    required: function (this: { role: string }) {
+      return this.role === "student";
+    },
+    default: function (this: { role: string }) {
+      return this.role === "student" ? "First" : undefined;
+    },
   },
   gpa: {
     type: Number,
@@ -93,12 +108,14 @@ const userSchema = new mongoose.Schema<User>({
           "D",
           "D-",
           "F",
+          "P/CR",
         ],
-        maxlength: 2,
+        maxlength: 4,
         required: function (this: { status: string }) {
           return this.status === "taken";
         },
       },
+      comment: { type: String },
     },
   ],
   activities: [
@@ -118,6 +135,12 @@ const userSchema = new mongoose.Schema<User>({
       startedAt: { type: Date, default: Date.now },
     },
   ],
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpires: {
+    type: Date,
+  },
 });
 
 export default mongoose.model<User>("User", userSchema);

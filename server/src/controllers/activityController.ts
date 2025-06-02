@@ -1,11 +1,13 @@
 import activityModel from "../models/activityModel";
 import userModel from "../models/userModel";
 import { Request, Response } from "express";
+import getSemester from "../utils/getCurrentSemester";
 
 interface AuthenticatedRequest extends Request {
-  user?: {
+  user: {
     _id: string;
     role: string;
+    department: string;
   };
 }
 
@@ -33,13 +35,11 @@ export async function getAllActivitiesForStudent(
   req: Request,
   res: Response
 ): Promise<any> {
-  // first verify if user has role student
-  const semester = req.params.semester;
   const studentId = (req as AuthenticatedRequest).user?._id;
+  const currentSemester = getSemester().split(" ")[0];
   try {
-    // get all activities for the semester
     const allActivitiesForSemester = await activityModel.find({
-      activity_semester: semester,
+      activity_semester: currentSemester,
     });
     if (!allActivitiesForSemester) {
       return res.status(404).json({ msg: "No activities for this semester" });
@@ -61,6 +61,7 @@ export async function getAllActivitiesForStudent(
     const studentActivityIdsAndStatus = studentActivitiesArray?.map(
       (activity) => ({
         activityId: activity.activityId?.toString(),
+        comment: activity.comment,
         status: activity.status,
       })
     );
@@ -74,6 +75,7 @@ export async function getAllActivitiesForStudent(
       if (matchedActivity) {
         return {
           activity,
+          comment: matchedActivity.comment,
           status: matchedActivity.status,
         };
       } else {
@@ -92,8 +94,27 @@ export async function createActivity(
   req: Request,
   res: Response
 ): Promise<any> {
+  const {
+    activity_description,
+    activity_category,
+    activity_semester,
+    activity_year,
+  } = req.body;
+
+  if (
+    !activity_description?.trim() ||
+    !activity_category?.trim() ||
+    !activity_semester?.trim() ||
+    !activity_year?.trim()
+  )
+    return res.status(400).json({ msg: "Missing activity fields" });
+  const { department } = (req as AuthenticatedRequest).user;
   try {
-    const activity = await activityModel.create(req.body);
+    const activity = await activityModel.create({
+      ...req.body,
+      activity_department: department,
+      activity_description: activity_description.trim(),
+    });
     return res.status(200).json({ msg: "Activity created", activity });
   } catch (error) {
     return res.status(400).json({ msg: "Error creating activity", error });
@@ -114,8 +135,11 @@ export async function getActivity(req: Request, res: Response): Promise<any> {
 }
 
 interface activityBody {
-  activity_description?: string;
+  _id?: string;
   activity_category?: string;
+  activity_department?: string;
+  activity_description?: string;
+  activity_info_link?: string;
   activity_semester?: string;
   activity_year?: string;
 }
@@ -151,7 +175,10 @@ export async function deleteActivity(
     if (!activity) {
       return res.status(404).json({ msg: "Activity not found" });
     }
-    return res.status(200).json({ msg: "Activity deleted" });
+    await userModel.updateMany({}, { $pull: { activities: { activityId } } });
+    return res
+      .status(200)
+      .json({ msg: "Activity deleted and references removed", activityId });
   } catch (error) {
     return res.status(500).json({ msg: "Server error", error });
   }

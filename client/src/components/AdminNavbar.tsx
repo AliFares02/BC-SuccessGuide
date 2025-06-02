@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import useLogout from "../hooks/useLogout";
 
-function Navbar() {
+function AdminNavbar() {
   const [burgerClicked, setBurgerClicked] = useState(false);
-  const [clickedPage, setClickedPage] = useState("");
+  const [clickedPage, setClickedPage] = useState("admin-dashboard");
   const { logout } = useLogout();
 
   function handleLogout() {
@@ -16,11 +16,16 @@ function Navbar() {
       <h1 className="logo">
         <Link
           className="logo"
-          to="/"
+          to="/admin"
           onClick={() => setClickedPage("dashboard")}
         >
-          BC SuccessGuide
+          BC SuccessGuide{" "}
         </Link>
+        <span
+          style={{ fontWeight: "300", cursor: "default", userSelect: "none" }}
+        >
+          &nbsp;Admin
+        </span>
       </h1>
 
       <div
@@ -35,11 +40,13 @@ function Navbar() {
       <ul className={`nav-links ${burgerClicked ? "open" : ""} `}>
         <li>
           <Link
-            className={`${clickedPage === "dashboard" ? "is-clicked" : ""}`}
-            to="/"
+            className={`${
+              clickedPage === "admin-dashboard" ? "is-clicked" : ""
+            }`}
+            to="/admin"
             onClick={() => {
               setBurgerClicked(false);
-              setClickedPage("dashboard");
+              setClickedPage("admin-dashboard");
             }}
           >
             Dashboard
@@ -47,11 +54,11 @@ function Navbar() {
         </li>
         <li>
           <Link
-            className={`${clickedPage === "courses" ? "is-clicked" : ""}`}
-            to="/courses"
+            className={`${clickedPage === "admin-courses" ? "is-clicked" : ""}`}
+            to="/admin-courses"
             onClick={() => {
               setBurgerClicked(false);
-              setClickedPage("courses");
+              setClickedPage("admin-courses");
             }}
           >
             Courses
@@ -60,24 +67,24 @@ function Navbar() {
         <li>
           <Link
             className={`${
-              clickedPage === "degree-roadmap" ? "is-clicked" : ""
+              clickedPage === "admin-activities" ? "is-clicked" : ""
             }`}
-            to="/degree-roadmap"
+            to="/admin-activities"
             onClick={() => {
               setBurgerClicked(false);
-              setClickedPage("degree-roadmap");
+              setClickedPage("admin-activities");
             }}
           >
-            Degree Roadmap
+            Activities
           </Link>
         </li>
         <li>
           <Link
-            className={`${clickedPage === "account" ? "is-clicked" : ""}`}
-            to="/account"
+            className={`${clickedPage === "admin-account" ? "is-clicked" : ""}`}
+            to="/admin-account"
             onClick={() => {
               setBurgerClicked(false);
-              setClickedPage("account");
+              setClickedPage("admin-account");
             }}
           >
             Account
@@ -93,4 +100,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default AdminNavbar;

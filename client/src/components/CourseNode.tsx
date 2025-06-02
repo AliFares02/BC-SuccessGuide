@@ -1,16 +1,13 @@
 import { Handle, Position, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-type Course = {
+type CourseThumbnail = {
   course_code: string;
-  course_credits: string;
-  course_department: string;
   course_description: string;
-  course_name: string;
-  course_prerequisites: string[];
+  status?: "taken" | "in-progress";
 };
 
-type CourseNodeData = Course & {
+type CourseNodeData = CourseThumbnail & {
   onClick: () => void;
 };
 
@@ -24,9 +21,12 @@ function CourseNode({ id, data }: { id: string; data: CourseNodeData }) {
   return (
     <div
       className={`course-node ${
-        data.course_code === "CS101" ? "completed" : ""
+        data.status === "taken"
+          ? "completed"
+          : data.status === "in-progress"
+          ? "in-progress"
+          : ""
       }`}
-      // change data.course_code === "CS101" to check a completed attribute that you will add to the users courses flattened(combine past & current course att. into single courses att) courses attribute
       onClick={onClick}
     >
       <strong>{data.course_code}</strong>

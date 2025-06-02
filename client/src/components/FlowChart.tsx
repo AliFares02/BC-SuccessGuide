@@ -1,60 +1,177 @@
-import { Controls, ReactFlow } from "@xyflow/react";
+import { Controls, Edge, Node, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import axios from "axios";
+import dagre from "dagre";
+import { useEffect, useState } from "react";
+import {
+  MdCancel,
+  MdInfo,
+  MdOutlinePlaylistAdd,
+  MdOutlinePlaylistRemove,
+} from "react-icons/md";
+import { toast } from "react-toastify";
+import { Tooltip } from "react-tooltip";
+import useAuthContext from "../hooks/useAuthContext";
 import CourseNode from "./CourseNode";
-import React, { useState } from "react";
-import { MdCancel, MdOutlinePlaylistAdd } from "react-icons/md";
 
-type Course = {
-  course_code: string;
-  course_credits: string;
-  course_department: string;
-  course_description: string;
-  course_name: string;
-  course_prerequisites: string[];
+type DeptCourse = {
+  deptCourse: {
+    course_code: string;
+    course_credits: string;
+    course_department: string;
+    course_description: string;
+    course_name: string;
+    course_prerequisites: string[];
+  };
+  grade?: string;
+  semesterTaken?: string;
+  status?: "taken" | "in-progress";
 };
 
-function FlowChart({ flowchartCourses }: { flowchartCourses: Course[] }) {
-  // flowchartCourses.map((flowchartCourse, idx) => {
-  //   console.log("A course from the flowchart", flowchartCourse);
-  // });
-  const [selectedCourseNode, setSelectedCourseNode] = useState<Course | null>(
-    null
-  );
-  const handleNodeClick = (nodeData: Course) => {
-    setSelectedCourseNode(nodeData);
-  };
-  let startX = 0;
-  let startY = 0;
-  const flowchartCourseNodes = flowchartCourses.map((flowchartCourse, idx) => {
+const nodeWidth = 155;
+const nodeHeight = 105;
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  dagreGraph.setGraph({ rankdir: "TB" });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  return nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
     return {
-      id: String(idx + 1),
-      position: { x: (startX += 100), y: (startY += 100) },
-      data: {
-        course_code: flowchartCourse.course_code,
-        course_description: flowchartCourse.course_description,
-        onClick: () => handleNodeClick(flowchartCourse),
+      ...node,
+      position: {
+        x: nodeWithPosition.x - nodeWidth / 2,
+        y: nodeWithPosition.y - nodeHeight / 2,
       },
-      type: "custom",
     };
   });
-  // console.log("flowchartCourseNodes...", flowchartCourseNodes);
+};
 
-  const initialEdges = [
-    { type: "straight", id: "e1-2", source: "1", target: "2" },
-    { type: "straight", id: "e1-3", source: "1", target: "3" },
-    { type: "straight", id: "e1-4", source: "1", target: "4" },
-  ];
-  // console.log("selected node", selectedNode);
+function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
+  const [optimisticUIFlowChartCourses, setOptimisticUIFlowChartCourses] =
+    useState<DeptCourse[]>(flowchartCourses);
+  const [selectedCourseNode, setSelectedCourseNode] =
+    useState<DeptCourse | null>(null);
+  const { user } = useAuthContext();
+  const handleNodeClick = (nodeData: DeptCourse) => {
+    setSelectedCourseNode(nodeData);
+  };
+
+  useEffect(() => {
+    setOptimisticUIFlowChartCourses(flowchartCourses);
+  }, [flowchartCourses]);
+
+  const nodes: Node[] = optimisticUIFlowChartCourses.map((course) => ({
+    id: course.deptCourse.course_code,
+    data: {
+      course_code: course.deptCourse.course_code,
+      course_description: course.deptCourse.course_description,
+      ...(course.status && { status: course.status }),
+      onClick: () => handleNodeClick(course),
+    },
+    type: "custom",
+    position: { x: 0, y: 0 },
+  }));
+
+  const edges: Edge[] = optimisticUIFlowChartCourses.flatMap((course) => {
+    const targetId = course.deptCourse.course_code;
+    return course.deptCourse.course_prerequisites.map((prereq) => ({
+      id: `e-${prereq}-${targetId}`,
+      source: prereq,
+      target: targetId,
+      type: "default",
+      style: { stroke: "#818181" },
+    }));
+  });
+
+  const layoutedNodes = getLayoutedElements(nodes, edges);
+  // for refactoring, create a course context and dispatch functions related to adding, removing, getting courses
+  async function addCurrentCourse(courseCode: string) {
+    axios
+      .post(
+        "http://localhost:5000/api/users/current-courses/add",
+        { courseCode },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        //response.data.msg -> for alert
+
+        const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
+          if (course.deptCourse.course_code === response.data.courseCode) {
+            return {
+              ...course,
+              status: "in-progress" as "in-progress",
+            };
+          }
+          return course;
+        });
+        setOptimisticUIFlowChartCourses(updatedUICourses);
+        setSelectedCourseNode(null);
+        toast.success(response.data.msg);
+      })
+      .catch((error) => toast.error(error.response.data.msg));
+  }
+  async function removeCurrentCourse(courseCode: string) {
+    axios
+      .delete(
+        `http://localhost:5000/api/users/current-courses/remove/${courseCode}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
+          if (course.deptCourse.course_code === response.data.courseCode) {
+            return {
+              ...course,
+              status: undefined,
+            };
+          }
+          return course;
+        });
+        setOptimisticUIFlowChartCourses(updatedUICourses);
+        setSelectedCourseNode(null);
+        toast.success(response.data.msg);
+      })
+      .catch((error) => toast.error(error.response.data.msg));
+  }
 
   return (
-    <div style={{ height: "75dvh", width: "85%" }}>
+    <div className="core-flowchart-wrapper">
+      <Tooltip
+        id="core-more-info-icon"
+        place="top"
+        style={{ zIndex: "1000", whiteSpace: "normal", maxWidth: "250px" }}
+      />
+      <MdInfo
+        data-tooltip-id="core-more-info-icon"
+        data-tooltip-content="Click a course to learn more about it or add/remove it from your current courses."
+        className="more-info-btn-icon"
+      />
       <ReactFlow
-        nodes={flowchartCourseNodes}
-        edges={initialEdges}
+        nodes={layoutedNodes}
+        edges={edges}
         fitView
         nodeTypes={{ custom: CourseNode }}
       >
-        <Controls />
+        <Controls showInteractive={false} />
         {selectedCourseNode && (
           <div
             className="flowchart-course-overlay-wrapper"
@@ -69,23 +186,48 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: Course[] }) {
                 onClick={() => setSelectedCourseNode(null)}
               />
               <p className="course-title">
-                {selectedCourseNode.course_code} -{" "}
-                {selectedCourseNode.course_name}
+                {selectedCourseNode.deptCourse.course_code} -{" "}
+                {selectedCourseNode.deptCourse.course_name}
               </p>
               <div className="flowchart-course-overlay-contents">
                 <p className="course-description">
-                  {selectedCourseNode.course_description}
+                  {selectedCourseNode.deptCourse.course_description}
                 </p>
                 <div className="course-credits">
-                  Credits: {selectedCourseNode.course_credits}
+                  Credits: {selectedCourseNode.deptCourse.course_credits}
                 </div>
                 <div className="course-department">
-                  Department: {selectedCourseNode.course_department}
+                  Department: {selectedCourseNode.deptCourse.course_department}
                 </div>
-                <button className="add-to-courses-btn">
-                  <MdOutlinePlaylistAdd className="add-to-courses-icon" />
-                  Add to Current Courses
-                </button>
+                {selectedCourseNode.status === "in-progress" ? (
+                  <button
+                    className="remove-from-courses-btn"
+                    onClick={() =>
+                      removeCurrentCourse(
+                        selectedCourseNode.deptCourse.course_code
+                      )
+                    }
+                  >
+                    <MdOutlinePlaylistRemove className="remove-from-courses-icon" />
+                    Remove from Current Courses
+                  </button>
+                ) : selectedCourseNode.status !== "taken" ? (
+                  <button
+                    className="add-to-courses-btn"
+                    onClick={() =>
+                      addCurrentCourse(
+                        selectedCourseNode.deptCourse.course_code
+                      )
+                    }
+                  >
+                    <MdOutlinePlaylistAdd className="add-to-courses-icon" />
+                    Add to Current Courses
+                  </button>
+                ) : selectedCourseNode.status === "taken" ? (
+                  <div className="flowchart-course-semester-taken">
+                    Completed during: {selectedCourseNode.semesterTaken}
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>

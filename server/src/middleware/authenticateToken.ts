@@ -9,7 +9,7 @@ interface JWTPayload extends JwtPayload {
 }
 
 interface AuthenticatedRequest extends Request {
-  user?: {
+  user: {
     _id: string;
     role: string;
     department: string;

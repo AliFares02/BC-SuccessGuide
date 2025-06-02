@@ -38,7 +38,7 @@ router.delete(
 );
 
 router.get(
-  "/student-activities/:semester",
+  "/student-activities",
   authenticateToken,
   getAllActivitiesForStudent
 );

@@ -9,6 +9,7 @@ import {
 
 type AuthUser = {
   access: string;
+  _id: string;
   email: string;
   role: string;
   department: string;
@@ -55,6 +56,7 @@ type AuthProviderProps = {
 };
 
 type JwtPayload = {
+  _id: string;
   email: string;
   role: string;
   department: string;
@@ -72,10 +74,10 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const token = localStorage.getItem("access");
     if (token) {
-      const { email, role, department } = jwtDecode<JwtPayload>(token);
+      const { email, _id, role, department } = jwtDecode<JwtPayload>(token);
       dispatch({
         type: "LOGIN",
-        payload: { access: token, email, role, department },
+        payload: { access: token, _id, email, role, department },
       });
     } else {
       dispatch({ type: "AUTH_READY" });

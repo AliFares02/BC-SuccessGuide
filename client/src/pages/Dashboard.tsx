@@ -5,10 +5,16 @@ import { MdOutlinePendingActions } from "react-icons/md";
 import FlowChart from "../components/FlowChart";
 import axios from "axios";
 import useAuthContext from "../hooks/useAuthContext";
+import ConcentrationFlowChart from "../components/ConcentrationFlowChart";
 
 function Dashboard() {
   const [currentCourses, setCurrentCourses] = useState([]);
   const [flowchartCourses, setFlowchartCourses] = useState([]);
+  const [concentrationFlowchartCourses, setConcentrationFlowchartCourses] =
+    useState([]);
+  const [flowChartType, setFlowChartType] = useState<"core" | "concentration">(
+    "core"
+  );
   const [selectedActivityCategory, setSelectedActivityCategory] =
     useState("College Life");
   const activityCategories = [
@@ -26,39 +32,51 @@ function Dashboard() {
   }, []);
 
   async function fetchUserDashboard() {
-    if (!tkFetchLoading) {
-      if (user?.access) {
-        const flowChartDataReq = axios.get(
-          "http://localhost:5000/api/courses/",
+    if (!tkFetchLoading && user?.access) {
+      const headers = {
+        Authorization: `Bearer ${user.access}`,
+      };
+      const flowChartDataReq = axios.get("http://localhost:5000/api/users/", {
+        headers,
+      });
+      const academicTrackerReq = axios.get(
+        "http://localhost:5000/api/users/academic-tracker",
+        {
+          headers,
+        }
+      );
+      const requests = [flowChartDataReq, academicTrackerReq];
+
+      if (user?.department === "Communication") {
+        const concentrationFlowChartDataReq = axios.get(
+          "http://localhost:5000/api/users/concentration",
           {
-            headers: {
-              Authorization: `Bearer ${user?.access}`,
-            },
+            headers,
           }
         );
-        const academicTrackerReq = axios.get(
-          "http://localhost:5000/api/users/academic-tracker",
-          {
-            headers: {
-              Authorization: `Bearer ${user?.access}`,
-            },
-          }
-        );
-        axios
-          .all([flowChartDataReq, academicTrackerReq])
-          .then(
-            axios.spread((flowChartDataRes, academicTrackerRes) => {
-              setFlowchartCourses(flowChartDataRes.data?.courses);
+        requests.push(concentrationFlowChartDataReq);
+      }
+      axios
+        .all(requests)
+        .then(
+          axios.spread(
+            (flowChartDataRes, academicTrackerRes, concentrationRes) => {
+              setFlowchartCourses(
+                flowChartDataRes.data?.studentAndDeptCoursesJoined
+              );
               setCurrentCourses(academicTrackerRes.data?.studentCurrentCourses);
               parseActivities(academicTrackerRes.data?.activities);
-            })
+              if (concentrationRes) {
+                setConcentrationFlowchartCourses(
+                  concentrationRes.data.studentAndConCoursesJoined
+                );
+              }
+            }
           )
-          .catch((error) => console.error(error));
-      }
+        )
+        .catch((error) => console.error(error));
     }
   }
-  // if (flowchartCourses.length > 0)
-  //   console.log("flowchartCourses", flowchartCourses);
 
   interface Activity {
     activityId: {
@@ -93,17 +111,44 @@ function Dashboard() {
       },
       {}
     );
-    // console.log("activitiesGroupedByCategory", activitiesGroupedByCategory);
-
     setSemesterActivities(activitiesGroupedByCategory);
   }
 
   return (
     <div className="dashboard-container">
       <h1 className="page-title">My Communication Flowchart</h1>
-      <FlowChart flowchartCourses={flowchartCourses} />
+      {/* only render if user department is communication */}
+      {/* tabular approach to dynamically render btwn core & concentration flowcharts *2 separate flowchart components not one uniform one */}
+      {user?.department === "Communication" && (
+        <div className="flowchart-tabs">
+          <button
+            className={`core-flowchart-btn ${
+              flowChartType === "core" ? "active" : ""
+            }`}
+            onClick={() => setFlowChartType("core")}
+          >
+            Core
+          </button>
+          <button
+            className={`concentration-flowchart-btn ${
+              flowChartType === "concentration" ? "active" : ""
+            }`}
+            onClick={() => setFlowChartType("concentration")}
+          >
+            Concentration
+          </button>
+        </div>
+      )}
+
+      {flowChartType === "core" ? (
+        <FlowChart flowchartCourses={flowchartCourses} />
+      ) : (
+        <ConcentrationFlowChart
+          concentrationFlowchartCourses={concentrationFlowchartCourses}
+        />
+      )}
       <div className="outlook-stats-section">
-        <h2>You should know</h2>
+        <p className="page-sub-title">You should know</p>
         <div>
           <BsGraphUp />
           <p>
@@ -209,10 +254,8 @@ function Dashboard() {
             </div>
           </div>
         </div>
-        {/* a div that shows the current course schedule as well as the pathways checklist items that the student marked off as 'doing' */}
       </div>
       <div className="pathways-cards-container">
-        {/* make college life, expand your horizons, pathway to success be cards and once clicked will take them to pathways page, change pathways name to something more generic rather than college specific.  */}
         <p className="pathways-cards-title">
           Get the Tools to Jumpstart Your Future in CASD
         </p>
@@ -232,7 +275,7 @@ function Dashboard() {
             <p className="learn-more">Learn more &#8640;</p>
           </div>
           <div className="thumbnail-card">
-            <img src="/assets/images/college_life_1.jpg" alt="" />
+            <img src="/assets/images/bc_career_fair.jpg" alt="" />
             <div>
               <h2>Expand Your Horizons</h2>
             </div>
@@ -246,7 +289,7 @@ function Dashboard() {
             <p className="learn-more">Learn more &#8640;</p>
           </div>
           <div className="thumbnail-card">
-            <img src="/assets/images/college_life_1.jpg" alt="" />
+            <img src="/assets/images/bc_career_mentor.jpg" alt="" />
             <div>
               <h2>Pathway to Success</h2>
             </div>

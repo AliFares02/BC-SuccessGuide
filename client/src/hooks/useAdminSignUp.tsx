@@ -6,7 +6,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 type SignUpObject = {
-  name: string;
   email: string;
   password: string;
   department: string;
@@ -19,37 +18,38 @@ type JwtPayload = {
   department: string;
 };
 
-function useSignUp() {
+function useAdminSignUp() {
   const [signUpError, setSignUpError] = useState<string | null>(null);
   const [signUpLoading, setSignUpLoading] = useState(false);
   const { dispatch } = useAuthContext();
+  const { user } = useAuthContext();
 
   const navigate = useNavigate();
 
   async function signUp(signUpValues: SignUpObject) {
     setSignUpError(null);
     setSignUpLoading(true);
-    const { name, email, password, department } = signUpValues;
-    const trimmedName = name.trim();
+    const { email, password, department } = signUpValues;
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
-    if (
-      !trimmedName ||
-      !trimmedEmail ||
-      !trimmedPassword ||
-      !department ||
-      department === ""
-    ) {
+    if (!trimmedEmail || !trimmedPassword || !department || department === "") {
       setSignUpError("Missing fields");
       setSignUpLoading(false);
     } else {
       axios
-        .post("http://localhost:5000/api/users/sign-up", {
-          name: trimmedName,
-          email: trimmedEmail,
-          password: trimmedPassword,
-          department,
-        })
+        .post(
+          "http://localhost:5000/api/admin/sign-up",
+          {
+            email: trimmedEmail,
+            password: trimmedPassword,
+            department,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${user?.access}`,
+            },
+          }
+        )
         .then((response) => {
           localStorage.setItem("access", response?.data?.access_token);
           const { _id, email, role, department } = jwtDecode<JwtPayload>(
@@ -65,7 +65,7 @@ function useSignUp() {
               department,
             },
           });
-          navigate("/");
+          navigate("/admin");
         })
         .catch((error) => setSignUpError(error?.response?.data?.msg))
         .finally(() => {
@@ -76,4 +76,4 @@ function useSignUp() {
   return { signUp, signUpError, setSignUpError, signUpLoading };
 }
 
-export default useSignUp;
+export default useAdminSignUp;

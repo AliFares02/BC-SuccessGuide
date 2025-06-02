@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import useLogIn from "../hooks/useLogIn";
-import useSignUp from "../hooks/useSignUp";
+import useAdminSignUp from "../hooks/useAdminSignUp";
+import useAdminLogin from "../hooks/useAdminLogin";
+import useAuthContext from "../hooks/useAuthContext";
+import UnAuthorizedErrorPage from "./UnAuthorizedErrorPage";
 import { Link } from "react-router-dom";
 
-function SignUpLogin() {
+function AdminSignUpLogin() {
   const [authenticationOption, setAuthenticationOption] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loginValues, setLoginValues] = useState({
@@ -13,17 +15,18 @@ function SignUpLogin() {
     password: "",
   });
   const [signupValues, setSignupValues] = useState({
-    name: "",
     email: "",
     password: "",
     department: "",
   });
-  const { signUp, signUpError, setSignUpError, signUpLoading } = useSignUp();
-  const { login, loginError, setLoginError, loginLoading } = useLogIn();
+  const { user } = useAuthContext();
+  const { signUp, signUpError, setSignUpError, signUpLoading } =
+    useAdminSignUp();
+  const { login, loginError, setLoginError, loginLoading } = useAdminLogin();
 
   useEffect(() => {
     if (authenticationOption === "login") {
-      setSignupValues({ name: "", email: "", password: "", department: "" });
+      setSignupValues({ email: "", password: "", department: "" });
       setSignUpError(null);
     } else {
       setLoginValues({ email: "", password: "" });
@@ -45,9 +48,10 @@ function SignUpLogin() {
     <div className="authenticate-container">
       <h1 className="authentication-page-main-logo">BC SuccessGuide</h1>
       <div className="dynamic-authenticate-container">
-        {authenticationOption === "login" ? (
+        {authenticationOption === "login" && user?.role !== "admin" ? (
           <form onSubmit={handleLogin} className="authentication-form">
-            <h2>Log in</h2>
+            <h2>Admin</h2>
+            <h3>Log in</h3>
             <label htmlFor="email">Email</label>
             <div className="input-div">
               <input
@@ -100,27 +104,11 @@ function SignUpLogin() {
                 Sign Up
               </button>
             </div>
-            <div>
-              <p className="admin-login-link">
-                Admin? <Link to="/admin-authenticate">Log in here</Link>
-              </p>
-            </div>
           </form>
-        ) : (
+        ) : user && user?.role === "admin" ? (
           <form onSubmit={handleSignup} className="authentication-form">
-            <h2>Sign Up</h2>
-            <label htmlFor="name">Name</label>
-            <div className="input-div">
-              <input
-                type="text"
-                id="name"
-                onChange={(e) =>
-                  setSignupValues({ ...signupValues, name: e.target.value })
-                }
-                value={signupValues.name}
-              />
-            </div>
-
+            <h2>Admin</h2>
+            <h3>Sign Up</h3>
             <label htmlFor="email">Email</label>
             <div className="input-div">
               <input
@@ -187,7 +175,7 @@ function SignUpLogin() {
             >
               {signUpLoading ? <CgSpinner className="spinner" /> : "Sign up"}
             </button>
-            <div>
+            {/* <div>
               <p>
                 Already have an account?{" "}
                 <button
@@ -198,12 +186,14 @@ function SignUpLogin() {
                   Log in
                 </button>
               </p>
-            </div>
+            </div> */}
           </form>
+        ) : (
+          <UnAuthorizedErrorPage />
         )}
       </div>
     </div>
   );
 }
 
-export default SignUpLogin;
+export default AdminSignUpLogin;
