@@ -1196,6 +1196,10 @@ body {
   font-weight: 500;
 }
 
+.average-gpa-container {
+  margin-bottom: 5rem;
+}
+
 .gpa,
 .average-gpa {
   font-size: 1.5rem;
