@@ -222,7 +222,7 @@ function Courses() {
     e: React.ChangeEvent<any>,
     courseCode: string
   ) {
-    const formattedWhatIfCourses = whatIfCourses.map((whatIfCourse) => {
+    const formattedWhatIfCourses = whatIfCourses?.map((whatIfCourse) => {
       if (whatIfCourse.courseCode === courseCode) {
         return {
           ...whatIfCourse,
@@ -429,7 +429,7 @@ function Courses() {
           .then((response) => {
             setPastCourses((prev) => ({
               ...prev,
-              past_courses: prev.past_courses.map((course) =>
+              past_courses: prev.past_courses?.map((course) =>
                 course.courseCode === response.data.courseCode
                   ? { ...course, comment: response.data.comment }
                   : course
@@ -463,7 +463,7 @@ function Courses() {
           .then((response) => {
             setPastCourses((prev) => ({
               ...prev,
-              past_courses: prev.past_courses.map((course) =>
+              past_courses: prev.past_courses?.map((course) =>
                 course.courseCode === response.data.courseCode
                   ? { ...course, comment: undefined }
                   : course
@@ -575,7 +575,7 @@ function Courses() {
         const updatedSemester = response.data.updatedSemester;
         if (response.data?.isAfstAddCredCourse) {
           setAfstAdditionalCourses((prev) =>
-            prev.map((course) => {
+            prev?.map((course) => {
               if (course.courseCode === courseCode) {
                 return {
                   ...course,
@@ -587,7 +587,7 @@ function Courses() {
           );
         } else {
           setPastCourses((prev) => {
-            const courseWithUpdatedSemester = prev.past_courses.map(
+            const courseWithUpdatedSemester = prev.past_courses?.map(
               (course) => {
                 if (course.courseCode === courseCode) {
                   return {
@@ -633,7 +633,7 @@ function Courses() {
                     semester: string;
                     comment?: string;
                   }[]
-                ).map((course, idx) => (
+                )?.map((course, idx) => (
                   <tr key={idx}>
                     <td>
                       <div className="curr-courses-table-course-code-wrapper">
@@ -723,7 +723,7 @@ function Courses() {
             <tbody>
               {pastCourses.past_courses &&
               pastCourses.past_courses.length > 0 ? (
-                pastCourses.past_courses.map((course, idx) => (
+                pastCourses.past_courses?.map((course, idx) => (
                   <tr key={idx}>
                     <td>
                       <div className="curr-courses-table-course-code-wrapper">
@@ -767,7 +767,7 @@ function Courses() {
                           >
                             <option value=""></option>
                             {availableSemesters &&
-                              availableSemesters.map((semester) => (
+                              availableSemesters?.map((semester) => (
                                 <option key={semester}>{semester}</option>
                               ))}
                           </select>
@@ -931,7 +931,7 @@ function Courses() {
                   <tbody>
                     {afstAdditionalCourses &&
                     afstAdditionalCourses.length > 0 ? (
-                      afstAdditionalCourses.map((course, idx) => (
+                      afstAdditionalCourses?.map((course, idx) => (
                         <tr key={idx}>
                           <td>
                             <div className="curr-courses-table-course-code-wrapper">
@@ -967,7 +967,7 @@ function Courses() {
                                 >
                                   <option value=""></option>
                                   {availableSemesters &&
-                                    availableSemesters.map((semester) => (
+                                    availableSemesters?.map((semester) => (
                                       <option key={semester}>{semester}</option>
                                     ))}
                                 </select>
@@ -1076,7 +1076,7 @@ function Courses() {
                     course: string;
                     category: string;
                   }[]
-                ).map((course, idx) => (
+                )?.map((course, idx) => (
                   <tr key={idx}>
                     <td>
                       <p>{course.course}</p>
@@ -1191,7 +1191,7 @@ function Courses() {
               </thead>
               <tbody>
                 {incompleteCourses && incompleteCourses.length > 0 ? (
-                  (incompleteCourses as { courseCode: string }[]).map(
+                  (incompleteCourses as { courseCode: string }[])?.map(
                     (incompleteCourse) => {
                       const courseCode = incompleteCourse.courseCode;
                       let disableCommInternshipCourse = false;

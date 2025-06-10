@@ -165,7 +165,7 @@ function ConcentrationFlowChart({
     setSelectedCourseNode(course);
   }
 
-  const positionedCourses = optimisticUIFlowChartCourses.map((course, idx) => {
+  const positionedCourses = optimisticUIFlowChartCourses?.map((course, idx) => {
     const col = idx % columns;
     const row = Math.floor(idx / columns);
 
@@ -208,7 +208,7 @@ function ConcentrationFlowChart({
         }
       );
 
-      const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
+      const updatedUICourses = optimisticUIFlowChartCourses?.map((course) => {
         if (
           "concentrationCourse" in course &&
           course.concentrationCourse.course_code === response.data.courseCode
@@ -241,7 +241,7 @@ function ConcentrationFlowChart({
         }
       );
 
-      const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
+      const updatedUICourses = optimisticUIFlowChartCourses?.map((course) => {
         if (
           "concentrationCourse" in course &&
           course.concentrationCourse.course_code === response.data.courseCode

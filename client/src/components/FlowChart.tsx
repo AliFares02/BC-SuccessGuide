@@ -47,7 +47,7 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
 
   dagre.layout(dagreGraph);
 
-  return nodes.map((node) => {
+  return nodes?.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     return {
       ...node,
@@ -73,7 +73,7 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
     setOptimisticUIFlowChartCourses(flowchartCourses);
   }, [flowchartCourses]);
 
-  const nodes: Node[] = optimisticUIFlowChartCourses.map((course) => ({
+  const nodes: Node[] = optimisticUIFlowChartCourses?.map((course) => ({
     id: course.deptCourse.course_code,
     data: {
       course_code: course.deptCourse.course_code,
@@ -85,9 +85,9 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
     position: { x: 0, y: 0 },
   }));
 
-  const edges: Edge[] = optimisticUIFlowChartCourses.flatMap((course) => {
+  const edges: Edge[] = optimisticUIFlowChartCourses?.flatMap((course) => {
     const targetId = course.deptCourse.course_code;
-    return course.deptCourse.course_prerequisites.map((prereq) => ({
+    return course.deptCourse.course_prerequisites?.map((prereq) => ({
       id: `e-${prereq}-${targetId}`,
       source: prereq,
       target: targetId,
@@ -109,7 +109,7 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
         }
       )
       .then((response) => {
-        const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
+        const updatedUICourses = optimisticUIFlowChartCourses?.map((course) => {
           if (course.deptCourse.course_code === response.data.courseCode) {
             return {
               ...course,
@@ -135,7 +135,7 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
         }
       )
       .then((response) => {
-        const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
+        const updatedUICourses = optimisticUIFlowChartCourses?.map((course) => {
           if (course.deptCourse.course_code === response.data.courseCode) {
             return {
               ...course,

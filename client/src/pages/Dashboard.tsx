@@ -512,7 +512,7 @@ function Dashboard() {
               >
                 <option value=""></option>
                 {availableSemesters &&
-                  availableSemesters.map((semester) => (
+                  availableSemesters?.map((semester) => (
                     <option key={semester}>{semester}</option>
                   ))}
               </select>
@@ -558,7 +558,7 @@ function Dashboard() {
               </thead>
               <tbody>
                 {currentCourses && currentCourses.length > 0 ? (
-                  (currentCourses as { courseCode: string }[]).map(
+                  (currentCourses as { courseCode: string }[])?.map(
                     (course, idx) => (
                       <tr key={idx}>
                         <td>{course.courseCode}</td>
@@ -587,7 +587,7 @@ function Dashboard() {
                 </Link>
               </h3>
               <div className="current-checklist-tabs">
-                {activityCategories.map((activityCategory, index) => (
+                {activityCategories?.map((activityCategory, index) => (
                   <label
                     className={`checkList-category ${
                       selectedActivityCategory === activityCategory
@@ -606,7 +606,7 @@ function Dashboard() {
               <div className="current-checklist-tabs-categories">
                 <ul>
                   {semesterActivities[selectedActivityCategory]?.length > 0 ? (
-                    semesterActivities[selectedActivityCategory].map(
+                    semesterActivities[selectedActivityCategory]?.map(
                       (activity, idx) => (
                         <li key={idx}>
                           <MdOutlinePendingActions
@@ -637,7 +637,7 @@ function Dashboard() {
 
         {careerOutlookStats[
           user?.department as keyof typeof careerOutlookStats
-        ].map((stat, idx) => {
+        ]?.map((stat, idx) => {
           const IconComponent = iconMap[stat.icon as keyof typeof iconMap];
           return (
             <div key={idx}>

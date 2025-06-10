@@ -150,7 +150,7 @@ function AdminDashboard() {
   }, []);
 
   function parseStudents(students: Student[]) {
-    const parsedStudents = students.map((student) => {
+    const parsedStudents = students?.map((student) => {
       const pastActivities = student.activities.filter(
         (activity) => activity.status === "completed"
       ) as ParsedStudent["pastActivities"];
@@ -300,7 +300,7 @@ function AdminDashboard() {
               </thead>
               <tbody>
                 {allStudents &&
-                  allStudents.map((student) => (
+                  allStudents?.map((student) => (
                     <tr
                       key={student._id}
                       onClick={() => {
@@ -425,7 +425,7 @@ function AdminDashboard() {
                       <ul>
                         {selectedCategory === "current courses" ? (
                           selectedStudent.currentCourses?.length > 0 ? (
-                            selectedStudent.currentCourses.map((course) => (
+                            selectedStudent.currentCourses?.map((course) => (
                               <li key={course.courseCode}>
                                 &#8640; {course.courseCode}
                               </li>
@@ -435,7 +435,7 @@ function AdminDashboard() {
                           )
                         ) : selectedCategory === "past courses" ? (
                           selectedStudent.pastCourses.length > 0 ? (
-                            selectedStudent.pastCourses.map((course) => (
+                            selectedStudent.pastCourses?.map((course) => (
                               <li key={course.courseCode}>
                                 <div className="admin-student-li-item-wrapper">
                                   &#8640; {course.courseCode}
@@ -471,7 +471,7 @@ function AdminDashboard() {
                                   {selectedStudent.concentration}
                                 </span>
                               </p>
-                              {selectedStudent.concentrationCourses.map(
+                              {selectedStudent.concentrationCourses?.map(
                                 (course) => (
                                   <li key={course.courseCode}>
                                     <div className="admin-student-li-item-wrapper">
@@ -497,7 +497,7 @@ function AdminDashboard() {
                           )
                         ) : selectedCategory === "current activities" ? (
                           selectedStudent?.currentActivities?.length > 0 ? (
-                            selectedStudent.currentActivities.map(
+                            selectedStudent.currentActivities?.map(
                               (activity) => (
                                 <li key={activity.activityId?._id}>
                                   <div className="admin-student-li-item-wrapper">
@@ -519,7 +519,7 @@ function AdminDashboard() {
                           )
                         ) : selectedCategory === "past activities" ? (
                           selectedStudent.pastActivities.length > 0 ? (
-                            selectedStudent.pastActivities.map((activity) => (
+                            selectedStudent.pastActivities?.map((activity) => (
                               <li key={activity.activityId?._id}>
                                 <div className="admin-student-li-item-wrapper">
                                   &#8640;{" "}

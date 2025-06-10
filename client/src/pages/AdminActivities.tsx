@@ -273,7 +273,7 @@ function AdminActivities() {
                 };
               }
             }
-            const addedToNewCategory = prev[upToDateActivityCategory].map(
+            const addedToNewCategory = prev[upToDateActivityCategory]?.map(
               (activity) =>
                 activity._id === activityId ? response.data.activity : activity
             );
@@ -365,7 +365,7 @@ function AdminActivities() {
                   </td>
                 </tr>
               ) : (
-                Array.from({ length: maxTableRows }).map((_, i) => (
+                Array.from({ length: maxTableRows })?.map((_, i) => (
                   <tr key={i}>
                     <td
                       onClick={() => {
@@ -550,7 +550,7 @@ function AdminActivities() {
                                 id="activity-info-links-ctr"
                                 className="activity-info-links-ctr"
                               >
-                                {updatedActivityBody.activity_info_links.map(
+                                {updatedActivityBody.activity_info_links?.map(
                                   (link, idx) => (
                                     <p key={idx} className="activity-info-link">
                                       <a href={link} target="_blank">
@@ -672,7 +672,7 @@ function AdminActivities() {
                         <ul>
                           {activityActiveStudents &&
                           activityActiveStudents.length > 0 ? (
-                            activityActiveStudents.map((student) => (
+                            activityActiveStudents?.map((student) => (
                               <li key={student._id}>
                                 <div
                                   style={{
@@ -748,7 +748,7 @@ function AdminActivities() {
             </thead>
             <tbody>
               {inactiveStudents?.length > 0 &&
-                inactiveStudents.map((inactiveStudent, idx) => (
+                inactiveStudents?.map((inactiveStudent, idx) => (
                   <tr key={idx}>
                     <td>
                       <p>{inactiveStudent.name}</p>
@@ -858,28 +858,30 @@ function AdminActivities() {
                     id="activity-info-links-ctr"
                     className="activity-info-links-ctr"
                   >
-                    {createActivityBody.activity_info_links.map((link, idx) => (
-                      <p key={idx} className="activity-info-link">
-                        <a href={link} target="_blank">
-                          {link}
-                        </a>
-                        <MdLinkOff
-                          className="remove-link-icon"
-                          onClick={() =>
-                            setCreateActivityBody((prev) => {
-                              const newInfoLinks =
-                                prev?.activity_info_links?.filter(
-                                  (_, i) => i !== idx
-                                );
-                              return {
-                                ...prev,
-                                activity_info_links: newInfoLinks,
-                              };
-                            })
-                          }
-                        />
-                      </p>
-                    ))}
+                    {createActivityBody.activity_info_links?.map(
+                      (link, idx) => (
+                        <p key={idx} className="activity-info-link">
+                          <a href={link} target="_blank">
+                            {link}
+                          </a>
+                          <MdLinkOff
+                            className="remove-link-icon"
+                            onClick={() =>
+                              setCreateActivityBody((prev) => {
+                                const newInfoLinks =
+                                  prev?.activity_info_links?.filter(
+                                    (_, i) => i !== idx
+                                  );
+                                return {
+                                  ...prev,
+                                  activity_info_links: newInfoLinks,
+                                };
+                              })
+                            }
+                          />
+                        </p>
+                      )
+                    )}
                   </div>
                 </>
               ) : null}

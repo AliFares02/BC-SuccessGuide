@@ -431,7 +431,7 @@ function AdminCourses() {
         if (user?.department === "Communication") {
           if (updatedCourse?.isConcentrationCourse) {
             setConcentrationCourses((prev) => {
-              const updatedCourses = prev.map((course) => {
+              const updatedCourses = prev?.map((course) => {
                 if (course.course_code === updatedCourse.course_code) {
                   return updatedCourse;
                 }
@@ -441,7 +441,7 @@ function AdminCourses() {
             });
           } else {
             setCoreCourses((prev) => {
-              const updatedCourses = prev.map((course) => {
+              const updatedCourses = prev?.map((course) => {
                 if (course.course_code === updatedCourse.course_code) {
                   return updatedCourse;
                 }
@@ -452,7 +452,7 @@ function AdminCourses() {
           }
         } else {
           setAllCourses((prev) => {
-            const updatedCourses = prev.map((course) => {
+            const updatedCourses = prev?.map((course) => {
               if (course.course_code === updatedCourse.course_code) {
                 return updatedCourse;
               }
@@ -602,7 +602,7 @@ function AdminCourses() {
             <tbody>
               {user?.department === "Communication"
                 ? adminCoursesType === "core"
-                  ? coreCourses.map((course) => (
+                  ? coreCourses?.map((course) => (
                       <tr
                         key={course._id}
                         onClick={() => setSelectedCourse(course)}
@@ -624,7 +624,7 @@ function AdminCourses() {
                         </td>
                       </tr>
                     ))
-                  : filteredConcentrationCourses.map((course) => (
+                  : filteredConcentrationCourses?.map((course) => (
                       <tr
                         key={course._id}
                         onClick={() => setSelectedCourse(course)}
@@ -647,7 +647,7 @@ function AdminCourses() {
                       </tr>
                     ))
                 : allCourses &&
-                  allCourses.map((course) => (
+                  allCourses?.map((course) => (
                     <tr
                       key={course._id}
                       onClick={() => setSelectedCourse(course)}
@@ -818,7 +818,7 @@ function AdminCourses() {
                                 id="course-prerequisites-ctr"
                                 className="course-prerequisites-ctr"
                               >
-                                {selectedCourse.course_prerequisites.map(
+                                {selectedCourse.course_prerequisites?.map(
                                   (course) => (
                                     <p
                                       key={course}
@@ -853,7 +853,7 @@ function AdminCourses() {
                       ) : (
                         <ul>
                           {enrolledStudents && enrolledStudents.length > 0 ? (
-                            enrolledStudents.map((student) => (
+                            enrolledStudents?.map((student) => (
                               <li
                                 key={student._id}
                                 style={{
@@ -917,7 +917,7 @@ function AdminCourses() {
                       ) : (
                         <ul>
                           {courseComments && courseComments.length > 0 ? (
-                            courseComments.map((comment, idx) => (
+                            courseComments?.map((comment, idx) => (
                               <li
                                 style={{
                                   marginBottom: ".5rem",
@@ -1212,7 +1212,7 @@ function AdminCourses() {
                     id="create-course-prerequisites-ctr"
                     className="create-course-prerequisites-ctr"
                   >
-                    {createCourseBody.course_prerequisites.map((course) => (
+                    {createCourseBody.course_prerequisites?.map((course) => (
                       <p key={course} className="course-prerequisite">
                         {course}
                         <IoIosClose
@@ -1241,7 +1241,7 @@ function AdminCourses() {
                     >
                       <option value=""></option>
                       {availablePrereqs?.length > 0 &&
-                        availablePrereqs.map((prereq, idx) => (
+                        availablePrereqs?.map((prereq, idx) => (
                           <option key={idx} value={prereq}>
                             {prereq}
                           </option>
@@ -1270,7 +1270,7 @@ function AdminCourses() {
                   >
                     <option value=""></option>
                     {availablePrereqs?.length > 0 &&
-                      availablePrereqs.map((prereq, idx) => (
+                      availablePrereqs?.map((prereq, idx) => (
                         <option key={idx} value={prereq}>
                           {prereq}
                         </option>

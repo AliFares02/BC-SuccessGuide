@@ -59,7 +59,7 @@ function Footer() {
           <ul>
             {departmentContactMap[
               user?.department as keyof typeof departmentContactMap
-            ].map((contact, idx) => {
+            ]?.map((contact, idx) => {
               if (!contact) return null;
 
               if (idx === 0) {

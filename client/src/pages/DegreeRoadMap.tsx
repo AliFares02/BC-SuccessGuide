@@ -106,7 +106,7 @@ function DegreeRoadMap() {
         activity.activity.activity_category as ActivityCategoryIdx
       ].push(activity);
     });
-    Object.values(parsedActivities).map((activityArr) => {
+    Object.values(parsedActivities)?.map((activityArr) => {
       return activityArr.sort(
         (activityA, activityB) =>
           activityA.activity.activity_priority -
@@ -160,7 +160,7 @@ function DegreeRoadMap() {
           )
           .then((response) => {
             setParsedActivities((prev) => {
-              const updatedParsedActivities = prev[activityCategory].map(
+              const updatedParsedActivities = prev[activityCategory]?.map(
                 (activity) =>
                   activity.activity._id === activityId
                     ? { ...activity, comment: response.data.activity.comment }
@@ -199,7 +199,7 @@ function DegreeRoadMap() {
           )
           .then((response) => {
             setParsedActivities((prev) => {
-              const updatedParsedActivities = prev[activityCategory].map(
+              const updatedParsedActivities = prev[activityCategory]?.map(
                 (activity) =>
                   activity.activity._id === activityId
                     ? { ...activity, comment: undefined }
@@ -238,7 +238,7 @@ function DegreeRoadMap() {
           )
           .then((response) => {
             setParsedActivities((prev) => {
-              const updatedParsedActivities = prev[activityCategory].map(
+              const updatedParsedActivities = prev[activityCategory]?.map(
                 (activity) =>
                   activity.activity._id === activityId
                     ? { ...activity, status: "completed" as const }
@@ -278,7 +278,7 @@ function DegreeRoadMap() {
       )
       .then((response) => {
         setParsedActivities((prev) => {
-          const updatedParsedActivities = prev[activityCategory].map(
+          const updatedParsedActivities = prev[activityCategory]?.map(
             (activity) =>
               activity.activity._id === activityId
                 ? { ...activity, status: "in-progress" as const }
@@ -310,7 +310,7 @@ function DegreeRoadMap() {
       )
       .then((response) => {
         setParsedActivities((prev) => {
-          const updatedParsedActivities = prev[activityCategory].map(
+          const updatedParsedActivities = prev[activityCategory]?.map(
             (activity) =>
               activity.activity._id === activityId
                 ? { ...activity, status: undefined, comment: undefined }
@@ -344,7 +344,7 @@ function DegreeRoadMap() {
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: maxTableRows }).map((_, i) => (
+              {Array.from({ length: maxTableRows })?.map((_, i) => (
                 <tr key={i}>
                   <td>
                     <div className="activity-td-wrapper">
@@ -405,7 +405,7 @@ function DegreeRoadMap() {
                         <div>
                           {parsedActivities["College Life"][
                             i
-                          ]?.activity.activity_info_links.map((link, idx) => (
+                          ]?.activity.activity_info_links?.map((link, idx) => (
                             <a
                               key={idx}
                               href={link}
@@ -611,7 +611,7 @@ function DegreeRoadMap() {
                         <div>
                           {parsedActivities["Expand Your Horizons"][
                             i
-                          ]?.activity.activity_info_links.map((link, idx) => (
+                          ]?.activity.activity_info_links?.map((link, idx) => (
                             <a
                               key={idx}
                               href={link}
@@ -821,7 +821,7 @@ function DegreeRoadMap() {
                         <div>
                           {parsedActivities["Pathway to Success"][
                             i
-                          ]?.activity.activity_info_links.map((link, idx) => (
+                          ]?.activity.activity_info_links?.map((link, idx) => (
                             <a
                               key={idx}
                               href={link}
@@ -1064,7 +1064,7 @@ function DegreeRoadMap() {
                 {alumniDestination &&
                   alumniDestination[
                     user?.department as keyof typeof alumniDestination
-                  ].careers.map((career, idx) => <li key={idx}>{career}</li>)}
+                  ]?.careers?.map((career, idx) => <li key={idx}>{career}</li>)}
               </ul>
             </div>
 
@@ -1074,7 +1074,7 @@ function DegreeRoadMap() {
                 {alumniDestination &&
                   alumniDestination[
                     user?.department as keyof typeof alumniDestination
-                  ].graduatePrograms.map((prog, idx) => (
+                  ]?.graduatePrograms?.map((prog, idx) => (
                     <li key={idx}>{prog}</li>
                   ))}
               </ul>
@@ -1087,7 +1087,7 @@ function DegreeRoadMap() {
           <p className="section-sub-title">Organizations you can join</p>
           <div className="tabs-wrapper">
             <div className="tabs">
-              {categories.map((category, idx) => (
+              {categories?.map((category, idx) => (
                 <label
                   key={idx}
                   className={`tab ${
@@ -1102,7 +1102,7 @@ function DegreeRoadMap() {
             <div className="tab-categories">
               <ul>
                 {items && items.length > 0 ? (
-                  items.map((item, idx) => <li key={idx}>&#8640; {item}</li>)
+                  items?.map((item, idx) => <li key={idx}>&#8640; {item}</li>)
                 ) : (
                   <li>No items available</li>
                 )}
