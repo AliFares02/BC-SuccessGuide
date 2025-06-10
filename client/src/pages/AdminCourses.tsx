@@ -1,7 +1,14 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
-import { MdCancel, MdDeleteForever, MdPlaylistAdd } from "react-icons/md";
+import {
+  MdCancel,
+  MdDeleteForever,
+  MdInfo,
+  MdPlaylistAdd,
+  MdPlaylistRemove,
+} from "react-icons/md";
 import { IoAddCircle } from "react-icons/io5";
 import { IoIosClose } from "react-icons/io";
 import { Tooltip } from "react-tooltip";
@@ -17,6 +24,9 @@ type Course = {
   course_difficulty: string;
   course_prerequisites: string[];
   enrollmentCount: number;
+  isConcentrationCourse?: string;
+  concentration?: string;
+  concentration_area?: string;
 };
 type Student = {
   gpa: number;
@@ -47,14 +57,27 @@ type CreateCourseBody = {
 };
 
 function AdminCourses() {
+  const [adminCoursesType, setAdminCoursesType] = useState<
+    "core" | "concentration"
+  >("core");
+  const [adminConcentrationFilterType, setAdminConcentrationFilterType] =
+    useState<
+      | string
+      | "Interpersonal and Intercultural Communication"
+      | "Professional and Organizational Communication"
+      | "Visual and Media Studies"
+    >("Interpersonal and Intercultural Communication");
+  const [coreCourses, setCoreCourses] = useState<Course[]>([]);
+  const [concentrationCourses, setConcentrationCourses] = useState<Course[]>(
+    []
+  );
+  const [filteredConcentrationCourses, setFilteredConcentrationCourses] =
+    useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [enrolledStudents, setEnrolledStudents] = useState<Student[]>([]);
   const [courseComments, setCourseComments] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
-  const [courseAvgEnrolleeGPA, setCourseAvgEnrolleeGPA] = useState<
-    number | null
-  >(null);
   const [createCourseOverlay, setCreateCourseOverlay] = useState(false);
   const [createCourseBody, setCreateCourseBody] = useState<CreateCourseBody>({
     course_code: "",
@@ -68,6 +91,10 @@ function AdminCourses() {
   const [updatedCourseBody, setUpdatedCourseBody] =
     useState<UpdatedCourseBody | null>(null);
   const [deleteCoursePrompt, setDeleteCoursePrompt] = useState(false);
+  const [unenrollPromptStudentId, setUnenrollPromptStudentId] = useState<
+    string | null
+  >(null);
+  const [unenrollPrompt, setUnenrollPrompt] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<
     "course details" | "enrolled students" | "course comments"
@@ -234,17 +261,43 @@ function AdminCourses() {
     setNewCoursePrerequisite("");
   }
 
+  function handleConcentrationCoursesFilter(concentrationType: string) {
+    const filtered = concentrationCourses.filter(
+      (course) => course.concentration === concentrationType
+    );
+    setFilteredConcentrationCourses(filtered);
+  }
+
+  function parseCommunicationCourses(courses: Course[]) {
+    const coreCourses: Course[] = [];
+    const concentrationCourses: Course[] = [];
+    for (const course of courses) {
+      if (course.isConcentrationCourse) {
+        concentrationCourses.push(course);
+      } else {
+        coreCourses.push(course);
+      }
+    }
+    setCoreCourses(coreCourses);
+    setConcentrationCourses(concentrationCourses);
+    const initialFiltered = concentrationCourses.filter(
+      (course) =>
+        course.concentration === "Interpersonal and Intercultural Communication"
+    );
+    setFilteredConcentrationCourses(initialFiltered);
+  }
+
   async function getAllCourses() {
     axios
-      .get("http://localhost:5000/api/admin/courses/all", {
+      .get(`${API_BASE_URL}/api/admin/courses/all`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },
       })
       .then((response) => {
-        console.log(response.data.coursesWithDetailsAndCounts);
-        console.log(response);
-
+        if (user?.department === "Communication") {
+          parseCommunicationCourses(response.data.coursesWithDetailsAndCounts);
+        }
         setAllCourses(response.data.coursesWithDetailsAndCounts);
         setAvailablePrereqs(response.data.availablePrereqs);
         setAvailablePrereqsCopy(response.data.availablePrereqs);
@@ -252,7 +305,7 @@ function AdminCourses() {
           new Map(Object.entries(response.data.existingPrereqStructure))
         );
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {});
   }
 
   async function getCourseEnrollees() {
@@ -264,7 +317,7 @@ function AdminCourses() {
     } else {
       axios
         .get(
-          `http://localhost:5000/api/admin/course/${selectedCourse?.course_code}/enrollees`,
+          `${API_BASE_URL}/api/admin/course/${selectedCourse?.course_code}/enrollees`,
           {
             headers: {
               Authorization: `Bearer ${user?.access}`,
@@ -279,7 +332,7 @@ function AdminCourses() {
           setEnrolledStudents(response.data.enrollees);
           setLoading(false);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {});
     }
   }
 
@@ -292,7 +345,7 @@ function AdminCourses() {
     } else {
       axios
         .get(
-          `http://localhost:5000/api/admin/course/${selectedCourse?.course_code}/comments`,
+          `${API_BASE_URL}/api/admin/course/${selectedCourse?.course_code}/comments`,
           {
             headers: {
               Authorization: `Bearer ${user?.access}`,
@@ -307,7 +360,7 @@ function AdminCourses() {
           setCourseComments(response.data.commentStrings);
           setLoadingComments(false);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {});
     }
   }
 
@@ -316,7 +369,7 @@ function AdminCourses() {
 
     axios
       .post(
-        "http://localhost:5000/api/courses/create-course",
+        `${API_BASE_URL}/api/courses/create-course`,
         {
           createCourseBody,
         },
@@ -330,7 +383,18 @@ function AdminCourses() {
         const newCourse =
           response.data.course || response.data.concentrationCourse;
         newCourse.enrollmentCount = response.data.enrollmentCount;
-        setAllCourses((prev) => [...prev, newCourse]);
+        if (user?.department === "Communication") {
+          if (newCourse?.isConcentrationCourse) {
+            setConcentrationCourses((prev) => [...prev, newCourse]);
+          } else {
+            setCoreCourses((prev) => [...prev, newCourse]);
+          }
+          setCourseIsConcentration("No");
+          setSelectedConcentration("");
+          setSelectedConcentrationArea("");
+        } else {
+          setAllCourses((prev) => [...prev, newCourse]);
+        }
         setCreateCourseError(null);
         setCreateCourseOverlay(false);
         setCreateCourseBody({
@@ -341,15 +405,10 @@ function AdminCourses() {
           course_difficulty: "",
           course_prerequisites: [],
         });
-        setCourseIsConcentration("No");
-        setSelectedConcentration("");
-        setSelectedConcentrationArea("");
         setAvailablePrereqs(availablePrereqsCopy);
         toast.success(response.data.msg);
       })
       .catch((error) => {
-        console.log("error", error);
-
         setCreateCourseError(error.response.data.msg);
       });
   }
@@ -358,7 +417,7 @@ function AdminCourses() {
     e.preventDefault();
     axios
       .patch(
-        `http://localhost:5000/api/courses/update-course/${updatedCourseBody?.course_code}`,
+        `${API_BASE_URL}/api/courses/update-course/${updatedCourseBody?.course_code}`,
         { updatedCourseBody },
         {
           headers: {
@@ -369,15 +428,39 @@ function AdminCourses() {
       .then((response) => {
         const updatedCourse = response.data.course;
         updatedCourse.enrollmentCount = response.data.enrollmentCount;
-        setAllCourses((prev) => {
-          const updatedCourses = prev.map((course) => {
-            if (course.course_code === updatedCourse.course_code) {
-              return updatedCourse;
-            }
-            return course;
+        if (user?.department === "Communication") {
+          if (updatedCourse?.isConcentrationCourse) {
+            setConcentrationCourses((prev) => {
+              const updatedCourses = prev.map((course) => {
+                if (course.course_code === updatedCourse.course_code) {
+                  return updatedCourse;
+                }
+                return course;
+              });
+              return updatedCourses;
+            });
+          } else {
+            setCoreCourses((prev) => {
+              const updatedCourses = prev.map((course) => {
+                if (course.course_code === updatedCourse.course_code) {
+                  return updatedCourse;
+                }
+                return course;
+              });
+              return updatedCourses;
+            });
+          }
+        } else {
+          setAllCourses((prev) => {
+            const updatedCourses = prev.map((course) => {
+              if (course.course_code === updatedCourse.course_code) {
+                return updatedCourse;
+              }
+              return course;
+            });
+            return updatedCourses;
           });
-          return updatedCourses;
-        });
+        }
         localStorage.removeItem("course_enrollees");
         localStorage.removeItem("comments");
         setSelectedCourse(null);
@@ -391,7 +474,7 @@ function AdminCourses() {
   async function handleDeleteCourse() {
     axios
       .delete(
-        `http://localhost:5000/api/courses/delete-course/${selectedCourse?.course_code}`,
+        `${API_BASE_URL}/api/courses/delete-course/${selectedCourse?.course_code}`,
         {
           headers: {
             Authorization: `Bearer ${user?.access}`,
@@ -399,10 +482,23 @@ function AdminCourses() {
         }
       )
       .then((response) => {
-        const removedCourseCode = response.data.courseCode;
-        setAllCourses((prev) =>
-          prev.filter((course) => course.course_code !== removedCourseCode)
-        );
+        const removedCourseCode: string = response.data.courseCode;
+        if (user?.department === "Communication") {
+          if (removedCourseCode.startsWith("COMM ")) {
+            // then its a core course
+            setCoreCourses((prev) =>
+              prev.filter((course) => course.course_code !== removedCourseCode)
+            );
+          } else {
+            setConcentrationCourses((prev) =>
+              prev.filter((course) => course.course_code !== removedCourseCode)
+            );
+          }
+        } else {
+          setAllCourses((prev) =>
+            prev.filter((course) => course.course_code !== removedCourseCode)
+          );
+        }
         localStorage.removeItem("course_enrollees");
         localStorage.removeItem("comments");
         setSelectedCourse(null);
@@ -416,10 +512,82 @@ function AdminCourses() {
       });
   }
 
+  function handleUnenrollStudent() {
+    axios
+      .delete(
+        `${API_BASE_URL}/api/admin/course/${selectedCourse?.course_code}/${unenrollPromptStudentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        toast.success(response.data.msg);
+        setEnrolledStudents((prev) =>
+          [...prev].filter((student) => student._id !== response.data.student)
+        );
+        setUnenrollPrompt(false);
+        setUnenrollPromptStudentId(null);
+        setSelectedCourse((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            enrollmentCount: prev.enrollmentCount - 1,
+          };
+        });
+      })
+      .catch((error) => {
+        toast.error(error.response.data.msg);
+        setUnenrollPrompt(false);
+        setUnenrollPromptStudentId(null);
+      });
+  }
+
   return (
     <div className="admin-courses-container">
       <h1 className="page-title">Courses</h1>
       <div className="admin-courses-subcontainer">
+        {user?.department === "Communication" && (
+          <div className="courses-type-tabs">
+            <button
+              className={`core-type-btn ${
+                adminCoursesType === "core" ? "active" : ""
+              }`}
+              onClick={() => setAdminCoursesType("core")}
+            >
+              Core
+            </button>
+            <button
+              className={`concentration-type-btn ${
+                adminCoursesType === "concentration" ? "active" : ""
+              }`}
+              onClick={() => setAdminCoursesType("concentration")}
+            >
+              Concentration
+            </button>
+            {adminCoursesType === "concentration" && (
+              <select
+                className="admin-concentration-filter-type-select"
+                value={adminConcentrationFilterType}
+                onChange={(e) => {
+                  handleConcentrationCoursesFilter(e.target.value);
+                  setAdminConcentrationFilterType(e.target.value);
+                }}
+              >
+                <option value="Interpersonal and Intercultural Communication">
+                  Interpersonal and Intercultural Communication
+                </option>
+                <option value="Professional and Organizational Communication">
+                  Professional and Organizational Communication
+                </option>
+                <option value="Visual and Media Studies">
+                  Visual and Media Studies
+                </option>
+              </select>
+            )}
+          </div>
+        )}
         <div className="admin-courses-table-wrapper">
           <table className="admin-courses-table">
             <thead>
@@ -432,27 +600,73 @@ function AdminCourses() {
               </tr>
             </thead>
             <tbody>
-              {allCourses &&
-                allCourses.map((course) => (
-                  <tr
-                    key={course._id}
-                    onClick={() => setSelectedCourse(course)}
-                  >
-                    <td data-cell="code">{course.course_code}</td>
-                    <td data-cell="name">
-                      <p className="course-name-cell">{course.course_name}</p>
-                    </td>
-                    <td data-cell="description">
-                      <p className="course-desc-cell">
-                        {course.course_description}
-                      </p>
-                    </td>
-                    <td data-cell="credits">{course.course_credits}</td>
-                    <td data-cell="enrollment count">
-                      {course.enrollmentCount}
-                    </td>
-                  </tr>
-                ))}
+              {user?.department === "Communication"
+                ? adminCoursesType === "core"
+                  ? coreCourses.map((course) => (
+                      <tr
+                        key={course._id}
+                        onClick={() => setSelectedCourse(course)}
+                      >
+                        <td data-cell="code">{course.course_code}</td>
+                        <td data-cell="name">
+                          <p className="course-name-cell">
+                            {course.course_name}
+                          </p>
+                        </td>
+                        <td data-cell="description">
+                          <p className="course-desc-cell">
+                            {course.course_description}
+                          </p>
+                        </td>
+                        <td data-cell="credits">{course.course_credits}</td>
+                        <td data-cell="enrollment count">
+                          {course.enrollmentCount}
+                        </td>
+                      </tr>
+                    ))
+                  : filteredConcentrationCourses.map((course) => (
+                      <tr
+                        key={course._id}
+                        onClick={() => setSelectedCourse(course)}
+                      >
+                        <td data-cell="code">{course.course_code}</td>
+                        <td data-cell="name">
+                          <p className="course-name-cell">
+                            {course.course_name}
+                          </p>
+                        </td>
+                        <td data-cell="description">
+                          <p className="course-desc-cell">
+                            {course.course_description}
+                          </p>
+                        </td>
+                        <td data-cell="credits">{course.course_credits}</td>
+                        <td data-cell="enrollment count">
+                          {course.enrollmentCount}
+                        </td>
+                      </tr>
+                    ))
+                : allCourses &&
+                  allCourses.map((course) => (
+                    <tr
+                      key={course._id}
+                      onClick={() => setSelectedCourse(course)}
+                    >
+                      <td data-cell="code">{course.course_code}</td>
+                      <td data-cell="name">
+                        <p className="course-name-cell">{course.course_name}</p>
+                      </td>
+                      <td data-cell="description">
+                        <p className="course-desc-cell">
+                          {course.course_description}
+                        </p>
+                      </td>
+                      <td data-cell="credits">{course.course_credits}</td>
+                      <td data-cell="enrollment count">
+                        {course.enrollmentCount}
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
           {selectedCourse && (
@@ -470,6 +684,8 @@ function AdminCourses() {
                   setSelectedCategory("course details");
                   setEnrolledStudents([]);
                   setDeleteCoursePrompt(false);
+                  setUnenrollPrompt(false);
+                  setUnenrollPromptStudentId(null);
                 }
               }}
             >
@@ -486,6 +702,8 @@ function AdminCourses() {
                       onClick={() => {
                         setSelectedCategory("course details");
                         setDeleteCoursePrompt(false);
+                        setUnenrollPrompt(false);
+                        setUnenrollPromptStudentId(null);
                       }}
                     >
                       Course details
@@ -512,6 +730,8 @@ function AdminCourses() {
                         getCourseComments();
                         setSelectedCategory("course comments");
                         setDeleteCoursePrompt(false);
+                        setUnenrollPrompt(false);
+                        setUnenrollPromptStudentId(null);
                       }}
                     >
                       Course comments
@@ -583,6 +803,7 @@ function AdminCourses() {
                             }
                             aria-label="Select number of credits for course"
                           >
+                            <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
@@ -633,7 +854,57 @@ function AdminCourses() {
                         <ul>
                           {enrolledStudents && enrolledStudents.length > 0 ? (
                             enrolledStudents.map((student) => (
-                              <li key={student._id}>&#8640; {student.name}</li>
+                              <li
+                                key={student._id}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                &#8640; {student.name}{" "}
+                                {unenrollPromptStudentId === student._id &&
+                                unenrollPrompt ? (
+                                  <>
+                                    <p style={{ margin: "0 .25rem 0 auto" }}>
+                                      Are you sure?
+                                    </p>
+                                    <strong
+                                      style={{
+                                        cursor: "pointer",
+                                        marginRight: ".5rem",
+                                      }}
+                                      onClick={handleUnenrollStudent}
+                                    >
+                                      ✅
+                                    </strong>
+                                    <strong
+                                      style={{ cursor: "pointer" }}
+                                      onClick={() => {
+                                        setUnenrollPrompt(false);
+                                        setUnenrollPromptStudentId(null);
+                                      }}
+                                    >
+                                      ❌
+                                    </strong>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Tooltip
+                                      id="unenroll-student"
+                                      place="top"
+                                    />
+                                    <MdPlaylistRemove
+                                      data-tooltip-id="unenroll-student"
+                                      data-tooltip-content={`Unenroll student from ${selectedCourse.course_code}`}
+                                      className="unenroll-student-from-course-icon"
+                                      onClick={() => {
+                                        setUnenrollPrompt(true);
+                                        setUnenrollPromptStudentId(student._id);
+                                      }}
+                                    />
+                                  </>
+                                )}
+                              </li>
                             ))
                           ) : (
                             <li>No enrolled students</li>
@@ -704,6 +975,8 @@ function AdminCourses() {
                     setSelectedCourse(null);
                     setSelectedCategory("course details");
                     setDeleteCoursePrompt(false);
+                    setUnenrollPrompt(false);
+                    setUnenrollPromptStudentId(null);
                   }}
                 />
               </div>
@@ -745,6 +1018,21 @@ function AdminCourses() {
             className="create-course-overlay"
             onClick={(e) => e.stopPropagation()}
           >
+            <Tooltip
+              id="create-course-more-info"
+              place="top"
+              style={{
+                zIndex: "1500",
+                whiteSpace: "normal",
+                maxWidth: "250px",
+              }}
+            />
+            <MdInfo
+              data-tooltip-id="create-course-more-info"
+              data-tooltip-content="Adding a prerequisite may hide others if they’re implied. E.g., COMM 1000 is hidden when COMM 2000 is added since it’s already required. If a prereq is missing, manually add it in the description."
+              className="create-course-more-info-btn-icon"
+            />
+
             <form
               className="create-course-form"
               onSubmit={(e) => handleCreateCourse(e)}
@@ -808,6 +1096,7 @@ function AdminCourses() {
                 }
               >
                 <option value=""></option>
+                <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>

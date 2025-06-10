@@ -36,10 +36,14 @@ export async function getAllActivitiesForStudent(
   res: Response
 ): Promise<any> {
   const studentId = (req as AuthenticatedRequest).user?._id;
+  const { department } = (req as AuthenticatedRequest).user;
   const currentSemester = getSemester().split(" ")[0];
+  const { studentYr } = req.params;
   try {
     const allActivitiesForSemester = await activityModel.find({
       activity_semester: currentSemester,
+      activity_department: department,
+      activity_year: studentYr,
     });
     if (!allActivitiesForSemester) {
       return res.status(404).json({ msg: "No activities for this semester" });
@@ -66,6 +70,7 @@ export async function getAllActivitiesForStudent(
       })
     );
 
+    let numOfSemActivitiesCompleted = 0;
     const combinedActivites = allActivitiesForSemester.map((activity) => {
       const matchedActivity = studentActivityIdsAndStatus?.find(
         (studentActivity) =>
@@ -73,6 +78,9 @@ export async function getAllActivitiesForStudent(
       );
 
       if (matchedActivity) {
+        if (matchedActivity.status === "completed") {
+          numOfSemActivitiesCompleted++;
+        }
         return {
           activity,
           comment: matchedActivity.comment,
@@ -84,7 +92,7 @@ export async function getAllActivitiesForStudent(
         };
       }
     });
-    res.status(200).json({ combinedActivites });
+    res.status(200).json({ combinedActivites, numOfSemActivitiesCompleted });
   } catch (error) {
     res.status(500).json({ msg: "Server error", error: error });
   }

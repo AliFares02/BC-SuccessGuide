@@ -63,13 +63,10 @@ type JwtPayload = {
 };
 
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
-  // useReducer calls authReducer and authReducer returns the new state(with a new user field in this case), in the return line above, to the state object destructured from the hook below i.e const [ -> state, dispatch] = ..., then this new state object is passed to child components in the return statement below
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     tkFetchLoading: true,
   });
-
-  //the main thing with adding the loading attribute is to make sure that any component that renders content based on the authContext state should check the loading value of the authcontext state and only render the content if the loading value is false else add some type of loading screen
 
   useEffect(() => {
     const token = localStorage.getItem("access");

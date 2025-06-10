@@ -54,6 +54,7 @@ export async function createCourse(req: Request, res: Response): Promise<any> {
         .json({ msg: "Missing course concentration fields" });
     }
   }
+
   try {
     // logic for handling Comm concentration course addition
     if (
@@ -85,7 +86,6 @@ export async function createCourse(req: Request, res: Response): Promise<any> {
         enrollmentCount: 0,
       });
     }
-    // add object directly to database without need for destructuring
     const courseExists = await courseModel.findOne({
       course_code: createCourseBody.course_code?.trim(),
       course_department: department,

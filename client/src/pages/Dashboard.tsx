@@ -1,11 +1,24 @@
+import { API_BASE_URL } from "../api/config";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { BsCashCoin, BsGraphUp, BsTools } from "react-icons/bs";
-import { IoIosArrowForward } from "react-icons/io";
-import { MdOutlinePendingActions } from "react-icons/md";
-import FlowChart from "../components/FlowChart";
-import axios from "axios";
-import useAuthContext from "../hooks/useAuthContext";
+import { IoIosArrowForward, IoMdAddCircle } from "react-icons/io";
+import {
+  MdOutlineEdit,
+  MdOutlinePendingActions,
+  MdPlaylistAdd,
+} from "react-icons/md";
+import { toast } from "react-toastify";
 import ConcentrationFlowChart from "../components/ConcentrationFlowChart";
+import FlowChart from "../components/FlowChart";
+import useAuthContext from "../hooks/useAuthContext";
+import {
+  getCurrentSemesterWithYear,
+  generateAvailableSemesters,
+} from "../utils/getCurrentSemesterWithYear";
+import careerOutlookStats from "../utils/careerOutlookStats.json";
+import whereYouCanGo from "../utils/whereYouCanGo.json";
+import { Link } from "react-router-dom";
 
 function Dashboard() {
   const [currentCourses, setCurrentCourses] = useState([]);
@@ -15,6 +28,17 @@ function Dashboard() {
   const [flowChartType, setFlowChartType] = useState<"core" | "concentration">(
     "core"
   );
+  const iconMap = {
+    BsCashCoin,
+    BsGraphUp,
+    BsTools,
+  };
+  const majorAbbrv = {
+    Communication: "COMM",
+    "Communication Sciences and Disorders": "CASD",
+    "Africana Studies": "AFST",
+  };
+
   const [selectedActivityCategory, setSelectedActivityCategory] =
     useState("College Life");
   const activityCategories = [
@@ -25,22 +49,53 @@ function Dashboard() {
   const [semesterActivities, setSemesterActivities] = useState<{
     [key: string]: Activity[];
   }>({});
+  const [studentYear, setStudentYear] = useState("");
+
+  const [afstChosenMajor, setAfstChosenMajor] = useState("");
+  const [existingAfstChosenMajor, setExistingAfstChosenMajor] = useState(null);
+  const [afstChosenMajorError, setAfstChosenMajorError] = useState<
+    string | null
+  >(null);
+  const [editAfstChosenMajor, setEditAfstChosenMajor] = useState(false);
+  const [afstAdditionalCourseCode, setAfstAdditionalCourseCode] =
+    useState<string>("");
+  const [afstAdditionalCourseCredits, setAfstAdditionalCourseCredits] =
+    useState<number | string>("2");
+  const [afstAdditionalCourseGrade, setAfstAdditionalCourseGrade] =
+    useState("");
+  const [
+    afstAdditionalCourseSemesterTaken,
+    setAfstAdditionalCourseSemesterTaken,
+  ] = useState("");
+  const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
   const { user, tkFetchLoading } = useAuthContext();
 
   useEffect(() => {
     fetchUserDashboard();
+    getStudentYear();
+    if (user?.department === "Africana Studies") {
+      getAfstChosenMajor();
+    }
   }, []);
+
+  if (user?.department === "Africana Studies") {
+    useEffect(() => {
+      if (existingAfstChosenMajor != null) {
+        setAfstChosenMajor(existingAfstChosenMajor);
+      }
+    }, [existingAfstChosenMajor]);
+  }
 
   async function fetchUserDashboard() {
     if (!tkFetchLoading && user?.access) {
       const headers = {
         Authorization: `Bearer ${user.access}`,
       };
-      const flowChartDataReq = axios.get("http://localhost:5000/api/users/", {
+      const flowChartDataReq = axios.get(`${API_BASE_URL}/api/users/`, {
         headers,
       });
       const academicTrackerReq = axios.get(
-        "http://localhost:5000/api/users/academic-tracker",
+        `${API_BASE_URL}/api/users/academic-tracker`,
         {
           headers,
         }
@@ -49,7 +104,7 @@ function Dashboard() {
 
       if (user?.department === "Communication") {
         const concentrationFlowChartDataReq = axios.get(
-          "http://localhost:5000/api/users/concentration",
+          `${API_BASE_URL}/api/users/concentration`,
           {
             headers,
           }
@@ -74,7 +129,7 @@ function Dashboard() {
             }
           )
         )
-        .catch((error) => console.error(error));
+        .catch((error) => {});
     }
   }
 
@@ -114,11 +169,138 @@ function Dashboard() {
     setSemesterActivities(activitiesGroupedByCategory);
   }
 
+  async function getStudentYear() {
+    axios
+      .get(`${API_BASE_URL}/api/users/account/year`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
+      .then((response) => {
+        const currentSemester = getCurrentSemesterWithYear();
+        const availableSemesters = generateAvailableSemesters(
+          currentSemester,
+          response.data.studentYear
+        );
+        setAvailableSemesters(availableSemesters);
+        setStudentYear(response.data.studentYear);
+      })
+      .catch((error) =>
+        toast.error(error.response.data.msg || error.response.data.error)
+      );
+  }
+
+  async function getAfstChosenMajor() {
+    axios
+      .get(`${API_BASE_URL}/api/users/afst-additional-major/`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
+      .then((response) => {
+        setExistingAfstChosenMajor(response.data.additionalMajor);
+      })
+      .catch((error) =>
+        setAfstChosenMajorError(
+          error.response.data.msg || error.response.data.error
+        )
+      );
+  }
+
+  async function handleAfstAddMajor() {
+    setAfstChosenMajorError(null);
+    if (
+      afstChosenMajor.trim().length < 1 ||
+      afstChosenMajor.trim().length > 50
+    ) {
+      setAfstChosenMajorError("Invalid major length");
+      return;
+    }
+    axios
+      .post(
+        `${API_BASE_URL}/api/users/afst-additional-major/add-major`,
+        {
+          additionalMajor: afstChosenMajor,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        setExistingAfstChosenMajor(response.data.additionalMajor);
+        setAfstChosenMajorError(null);
+        toast.success(response.data.msg);
+      })
+      .catch((error) =>
+        setAfstChosenMajorError(
+          error.response.data.msg || error.response.data.error
+        )
+      );
+  }
+
+  async function handleAfstAddMajorEdit() {
+    setEditAfstChosenMajor(true);
+    if (existingAfstChosenMajor === afstChosenMajor.trim()) {
+      setAfstChosenMajorError("Major must be different");
+      return;
+    }
+    axios
+      .patch(
+        `${API_BASE_URL}/api/users/afst-additional-major/update-major`,
+        {
+          newAdditionalMajor: afstChosenMajor,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        setExistingAfstChosenMajor(response.data.newAdditionalMajor);
+        setEditAfstChosenMajor(false);
+        toast.success(response.data.msg);
+      })
+      .catch((error) => {
+        setAfstChosenMajorError(
+          error.response.data.msg || error.response.data.error
+        );
+      });
+  }
+
+  async function handleAddAfstAdditionalCourse() {
+    axios
+      .post(
+        `${API_BASE_URL}/api/users/afst-additional-major/add-course/${afstAdditionalCourseCode}`,
+        {
+          credits: afstAdditionalCourseCredits,
+          grade: afstAdditionalCourseGrade,
+          semesterCompleted: afstAdditionalCourseSemesterTaken,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        toast.success(response.data.msg);
+      })
+      .catch((error) => {
+        toast.error(error.response.data.msg || error.response.data.error);
+      });
+  }
+
   return (
     <div className="dashboard-container">
-      <h1 className="page-title">My Communication Flowchart</h1>
+      <h1 className="page-title">
+        My {majorAbbrv[user?.department as keyof typeof majorAbbrv]} Flowchart
+      </h1>
       {/* only render if user department is communication */}
       {/* tabular approach to dynamically render btwn core & concentration flowcharts *2 separate flowchart components not one uniform one */}
+
       {user?.department === "Communication" && (
         <div className="flowchart-tabs">
           <button
@@ -140,38 +322,216 @@ function Dashboard() {
         </div>
       )}
 
-      {flowChartType === "core" ? (
+      {user?.department === "Africana Studies" ? (
+        <ConcentrationFlowChart
+          concentrationFlowchartCourses={flowchartCourses}
+        />
+      ) : flowChartType === "core" ? (
         <FlowChart flowchartCourses={flowchartCourses} />
       ) : (
         <ConcentrationFlowChart
           concentrationFlowchartCourses={concentrationFlowchartCourses}
         />
       )}
-      <div className="outlook-stats-section">
-        <p className="page-sub-title">You should know</p>
-        <div>
-          <BsGraphUp />
-          <p>
-            Communications careers are expected to grow <b>6%</b> from 2023 to
-            2033
+      {user?.department === "Africana Studies" && (
+        <div className="afst-additional-major-container">
+          <p className="container-title">
+            AFST students must complete 18 additional credits in a major of
+            their choice, ideally toward the end of their degree. List chosen
+            major and courses here:
           </p>
+          {existingAfstChosenMajor ? (
+            <>
+              <label htmlFor="major-of-choice">Chosen Major</label>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: ".5rem",
+                  marginBottom: ".5rem",
+                }}
+              >
+                {editAfstChosenMajor ? (
+                  <>
+                    <input
+                      type="text"
+                      value={afstChosenMajor}
+                      onChange={(e) => setAfstChosenMajor(e.target.value)}
+                    />
+                  </>
+                ) : (
+                  <p id="major-of-choice" style={{ margin: "0" }}>
+                    {existingAfstChosenMajor}
+                  </p>
+                )}
+
+                {editAfstChosenMajor ? (
+                  <>
+                    <button
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "0",
+                        fontSize: "1.2rem",
+                      }}
+                      onClick={handleAfstAddMajorEdit}
+                    >
+                      ✅
+                    </button>
+                    <button
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "0",
+                        fontSize: "1.2rem",
+                      }}
+                      onClick={() => setEditAfstChosenMajor(false)}
+                    >
+                      ❌
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="add-additional-major-btn"
+                    onClick={() => setEditAfstChosenMajor(true)}
+                  >
+                    <MdOutlineEdit />
+                  </button>
+                )}
+                {editAfstChosenMajor && (
+                  <p
+                    style={{
+                      color: "rgb(220, 53, 69)",
+                      fontSize: "0.8rem",
+                      flexBasis: "100%",
+                      textAlign: "center",
+                      padding: "0",
+                    }}
+                  >
+                    Warning: Changing major will erase your existing additional
+                    courses{" "}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <label htmlFor="major-of-choice">Enter major</label>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: ".5rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                <input
+                  id="major-of-choice"
+                  type="text"
+                  value={afstChosenMajor}
+                  onChange={(e) => setAfstChosenMajor(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="add-additional-major-btn"
+                  disabled={!afstChosenMajor}
+                  onClick={handleAfstAddMajor}
+                >
+                  <IoMdAddCircle />
+                </button>
+              </div>
+              {afstChosenMajorError && (
+                <div className="error">{afstChosenMajorError}</div>
+              )}
+            </>
+          )}
+          {existingAfstChosenMajor && (
+            <div className="add-additional-course-container">
+              <label htmlFor="add-additional-course-input">
+                Enter course code/abbr. (e.g "HIST 1201")
+              </label>
+              <input
+                id="add-additional-course-input"
+                type="text"
+                value={afstAdditionalCourseCode}
+                onChange={(e) => setAfstAdditionalCourseCode(e.target.value)}
+              />
+              <label htmlFor="add-additional-course-credits">
+                Select course credits
+              </label>
+              <select
+                id="add-additional-course-credits"
+                value={afstAdditionalCourseCredits}
+                onChange={(e) =>
+                  setAfstAdditionalCourseCredits(parseInt(e.target.value))
+                }
+              >
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+              <label htmlFor="add-additional-course-grade-select">
+                Select grade recieved
+              </label>
+              <select
+                id="add-additional-course-grade-select"
+                value={afstAdditionalCourseGrade}
+                onChange={(e) => setAfstAdditionalCourseGrade(e.target.value)}
+              >
+                <option value=""></option>
+                <option value="A+">A+</option>
+                <option value="A">A</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B">B</option>
+                <option value="B-">B-</option>
+                <option value="C+">C+</option>
+                <option value="C">C</option>
+                <option value="C-">C-</option>
+                <option value="D+">D+</option>
+                <option value="D">D</option>
+                <option value="D-">D</option>
+                <option value="F">F</option>
+                <option value="P/CR">P/CR</option>
+              </select>
+              <label htmlFor="add-additional-course-semester-select">
+                Select semester taken
+              </label>
+              <select
+                id="add-additional-course-semester-select"
+                value={afstAdditionalCourseSemesterTaken}
+                onChange={(e) =>
+                  setAfstAdditionalCourseSemesterTaken(e.target.value)
+                }
+              >
+                <option value=""></option>
+                {availableSemesters &&
+                  availableSemesters.map((semester) => (
+                    <option key={semester}>{semester}</option>
+                  ))}
+              </select>
+              <button
+                className="add-additional-course-btn"
+                disabled={
+                  !afstAdditionalCourseCode ||
+                  !afstAdditionalCourseGrade ||
+                  !afstAdditionalCourseSemesterTaken
+                }
+                onClick={handleAddAfstAdditionalCourse}
+              >
+                <MdPlaylistAdd />
+              </button>
+            </div>
+          )}
         </div>
-        <div>
-          <BsCashCoin />
-          <p>
-            Salaries in Communications range from <b>$50,000</b> to{" "}
-            <b>$95,000</b>
-          </p>
-        </div>
-        <div>
-          <BsTools />
-          <p>
-            Key skills for communications professionals include{" "}
-            <b>public speaking</b>, <b>writing</b>, <b>digital marketing</b>,{" "}
-            <b>social media management</b>, and <b>strategic thinking</b>.
-          </p>
-        </div>
-      </div>
+      )}
+
       <div className="academic-career-tracker-container">
         <div className="current-course-pathways-tracker">
           <div className="current-course-pathways-subcontainer-title">
@@ -184,9 +544,14 @@ function Dashboard() {
                   <th>
                     <h3>
                       Current Courses{" "}
-                      <IoIosArrowForward
-                        style={{ color: "rgb(136, 35, 70)", cursor: "pointer" }}
-                      />
+                      <Link to={"/courses"}>
+                        <IoIosArrowForward
+                          style={{
+                            color: "rgb(136, 35, 70)",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </Link>
                     </h3>
                   </th>
                 </tr>
@@ -212,9 +577,14 @@ function Dashboard() {
             <div className="current-checklist">
               <h3>
                 Milestone Tracker{" "}
-                <IoIosArrowForward
-                  style={{ color: "rgb(136, 35, 70)", cursor: "pointer" }}
-                />
+                <Link to={"/degree-roadmap"}>
+                  <IoIosArrowForward
+                    style={{
+                      color: "rgb(136, 35, 70)",
+                      cursor: "pointer",
+                    }}
+                  />
+                </Link>
               </h3>
               <div className="current-checklist-tabs">
                 {activityCategories.map((activityCategory, index) => (
@@ -255,9 +625,38 @@ function Dashboard() {
           </div>
         </div>
       </div>
+      <div className="what-if-tools-call-for-action">
+        <p className="container-title">
+          Explore the “What If” tools, at the end of your courses page, to see
+          how your future grades could shape your GPA — and whether your GPA
+          goals are within reach.
+        </p>
+      </div>
+      <div className="outlook-stats-section">
+        <p className="page-sub-title">You should know</p>
+
+        {careerOutlookStats[
+          user?.department as keyof typeof careerOutlookStats
+        ].map((stat, idx) => {
+          const IconComponent = iconMap[stat.icon as keyof typeof iconMap];
+          return (
+            <div key={idx}>
+              <IconComponent />
+              <p dangerouslySetInnerHTML={{ __html: stat.text }} />
+            </div>
+          );
+        })}
+      </div>
+      <div className="where-you-can-go-container">
+        <p className="page-sub-title">Where you can go with your degree</p>
+        <p className="where-you-can-go">
+          {whereYouCanGo[user?.department as keyof typeof whereYouCanGo]}
+        </p>
+      </div>
       <div className="pathways-cards-container">
         <p className="pathways-cards-title">
-          Get the Tools to Jumpstart Your Future in CASD
+          Get the Tools to Jumpstart Your Future in{" "}
+          {majorAbbrv[user?.department as keyof typeof majorAbbrv]}
         </p>
         <div className="pathways-cards-sub-container">
           <div className="thumbnail-card">
@@ -272,7 +671,9 @@ function Dashboard() {
                 foundation for success.
               </p>
             </div>
-            <p className="learn-more">Learn more &#8640;</p>
+            <p className="learn-more">
+              <Link to={"/degree-roadmap"}>Learn more &#8640;</Link>
+            </p>
           </div>
           <div className="thumbnail-card">
             <img src="/assets/images/bc_career_fair.jpg" alt="" />
@@ -286,7 +687,9 @@ function Dashboard() {
                 beyond the classroom.
               </p>
             </div>
-            <p className="learn-more">Learn more &#8640;</p>
+            <p className="learn-more">
+              <Link to={"/degree-roadmap"}>Learn more &#8640;</Link>
+            </p>
           </div>
           <div className="thumbnail-card">
             <img src="/assets/images/bc_career_mentor.jpg" alt="" />
@@ -300,7 +703,9 @@ function Dashboard() {
                 guidance.
               </p>
             </div>
-            <p className="learn-more">Learn more &#8640;</p>
+            <p className="learn-more">
+              <Link to={"/degree-roadmap"}>Learn more &#8640;</Link>
+            </p>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import ScrollToTop from "./components/ScrollToTop";
 import useAuthContext from "./hooks/useAuthContext";
 import AccountSettings from "./pages/AccountSettings";
+import AdminAccountSettings from "./pages/AdminAccountSettings";
 import AdminActivities from "./pages/AdminActivities";
 import AdminCourses from "./pages/AdminCourses";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -17,10 +18,10 @@ import Dashboard from "./pages/Dashboard";
 import DegreeRoadMap from "./pages/DegreeRoadMap";
 import ErrorPage from "./pages/ErrorPage";
 import RequestResetPassword from "./pages/RequestResetPassword";
+import ResetPassword from "./pages/ResetPassword";
 import SignUpLogin from "./pages/SignUpLogin";
 import UnAuthorizedErrorPage from "./pages/UnAuthorizedErrorPage";
-import ResetPassword from "./pages/ResetPassword";
-import AdminAccountSettings from "./pages/AdminAccountSettings";
+import { useState } from "react";
 
 function App() {
   const location = useLocation();
@@ -31,11 +32,13 @@ function App() {
     location.pathname === "/reset-password";
   const { user } = useAuthContext();
 
+  const [bannerVisible, setBannerVisible] = useState(false);
+
   return (
-    <div className="app-container">
+    <div className={`app-container ${bannerVisible ? "banner-visible" : ""}`}>
       {!hideComponent &&
         (user?.role === "student" ? (
-          <Navbar />
+          <Navbar setBannerVisible={setBannerVisible} />
         ) : (
           user?.role === "admin" && <AdminNavbar />
         ))}

@@ -225,10 +225,60 @@ export async function getAllStudents(
       .limit(limit)
       .select("_id name email department year gpa courses activities")
       .lean();
+
     const total = await userModel.countDocuments({
       role: "student",
       department: department,
     });
+
+    if (department === "Communication") {
+      const commConcCourses = await courseModel
+        .find({ course_department: department, isConcentrationCourse: true })
+        .lean();
+      const commStudents = students.map((student) => {
+        const chosenConcentration = commConcCourses.find((course) =>
+          student.courses?.find(
+            (stdntCourse) =>
+              stdntCourse.courseCode === course.course_code &&
+              stdntCourse.status === "taken"
+          )
+        )?.concentration;
+        const studentCommCourses = student.courses?.map((stdntCourse) => {
+          const isConcCourse = commConcCourses.find(
+            (course) =>
+              course.course_code === stdntCourse.courseCode &&
+              stdntCourse.status === "taken"
+          );
+
+          if (isConcCourse) {
+            return {
+              ...stdntCourse,
+              concentration: isConcCourse.concentration,
+            };
+          }
+          return stdntCourse;
+        });
+        if (
+          chosenConcentration &&
+          studentCommCourses &&
+          studentCommCourses?.length > 0
+        ) {
+          return {
+            ...student,
+            courses: studentCommCourses,
+            concentration: chosenConcentration,
+          };
+        }
+        return student;
+      });
+
+      return res.status(200).json({
+        students: commStudents,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalStudents: total,
+      });
+    }
 
     return res.status(200).json({
       students,
@@ -411,6 +461,39 @@ export async function getCourseEnrollees(
     return res
       .status(500)
       .json({ msg: "Error retrieving enrollees", error: error });
+  }
+}
+
+export async function unenrollStudentFromCourse(
+  req: Request,
+  res: Response
+): Promise<any> {
+  const { _id, department } = (req as AuthenticatedRequest).user;
+  const { courseCode, studentId } = req.params;
+
+  try {
+    const admin = await userModel.findById(_id);
+    if (!admin) return res.status(404).json({ msg: "Invalid admin" });
+
+    const student = await userModel.findOne({
+      _id: studentId,
+      department: department,
+    });
+
+    if (!student) return res.status(404).json({ msg: "Invalid student" });
+
+    student.courses = student.courses?.filter(
+      (course) => course.courseCode !== courseCode
+    );
+
+    await student.save();
+    return res
+      .status(200)
+      .json({ msg: "Student unenrolled", student: student._id });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ msg: "Error unenrolling student", error: error });
   }
 }
 

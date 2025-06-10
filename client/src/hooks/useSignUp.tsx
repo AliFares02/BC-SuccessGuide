@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import React from "react";
 import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -44,7 +45,7 @@ function useSignUp() {
       setSignUpLoading(false);
     } else {
       axios
-        .post("http://localhost:5000/api/users/sign-up", {
+        .post(`${API_BASE_URL}/api/users/sign-up`, {
           name: trimmedName,
           email: trimmedEmail,
           password: trimmedPassword,

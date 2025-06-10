@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import useAuthContext from "./useAuthContext";
@@ -36,7 +37,7 @@ function useAdminLogin() {
       setLoginLoading(false);
     } else {
       axios
-        .post("http://localhost:5000/api/admin/login", {
+        .post(`${API_BASE_URL}/api/admin/login`, {
           email: trimmedEmail,
           password: trimmedPassword,
         })

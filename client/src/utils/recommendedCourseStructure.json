@@ -1,0 +1,204 @@
+{
+  "Communication Sciences and Disorders": {
+  "First": {
+    "fall": [
+      { "course": "ENGL 1010", "category": "Pathways Required Core" },
+      { "course": "A Creative Expression course (MUSC 1300 recommended)", "category": "Pathways Flexible Core" },
+      { "course": "A U.S. Experience in its Diversity course", "category": "Pathways Flexible Core" },
+      { "course": "CASD 1619 or CASD 1635", "category": "Major" },
+      { "course": "CASD 1176", "category": "Major" }
+    ],
+    "spring": [
+      { "course": "ENGL 1012", "category": "Pathways Required Core" },
+      { "course": "A Creative Expression course", "category": "Pathways Flexible Core" },
+      { "course": "A World Cultures & Global Issues course", "category": "Pathways Flexible Core" },
+      { "course": "CASD 1113", "category": "Major" },
+      { "course": "CASD 1178", "category": "Major / Pathways Life & Physical Sciences" }
+    ]
+  },
+  "Second": {
+    "fall": [
+      { "course": "A Individual & Society course (SEED 2001 recommended)", "category": "Pathways Flexible Core" },
+      { "course": "A College Option course (PHYS 1005 recommended)", "category": "Pathways" },
+      { "course": "CASD 1179", "category": "Major" },
+      { "course": "LING 2001", "category": "Major / Pathways Scientific World" },
+      { "course": "A General Elective course (PSYC 1000 recommended)", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "CASD 2231", "category": "Major" },
+      { "course": "CASD 2277", "category": "Major" },
+      { "course": "A General Elective course (BIOL 1010 recommended)", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Third": {
+    "fall": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "CASD 2481", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "CASD 2482", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Fourth": {
+    "fall": [
+      { "course": "A Math & Quantitative Reasoning course (PSYC 3400 recommended)", "category": "Pathways Required Core" },
+      { "course": "CASD 3381", "category": "Major" },
+      { "course": "CASD 5275W", "category": "Major" },
+      { "course": "CASD 3382", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "CASD 4383", "category": "Major" },
+      { "course": "CASD 4384", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  }
+},
+
+  "Communication":
+{
+  "First": {
+    "fall": [
+      { "course": "ENGL 1010", "category": "Pathways" },
+      { "course": "A Math & Quantitative Reasoning course", "category": "Pathways" },
+      { "course": "COMM 1000", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "ENGL 1012", "category": "Pathways" },
+      { "course": "A U.S. Experience in its Diversity course", "category": "Pathways" },
+      { "course": "A Individual & Society course", "category": "Pathways" },
+      { "course": "TVRA 1165", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Second": {
+    "fall": [
+      { "course": "A Life & Physical Sciences course", "category": "Pathways" },
+      { "course": "A Creative Expression course", "category": "Pathways" },
+      { "course": "COMM 2000 or CASD 2639", "category": "Major" },
+      { "course": "COMM 3000 or ENGL 3196", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A World Cultures & Global Issues course", "category": "Pathways" },
+      { "course": "A Creative Expression course", "category": "Pathways" },
+      { "course": "A Scientific World course", "category": "Pathways" },
+      { "course": "COMM 3200 or PHIL 3315", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Third": {
+    "fall": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "COMM 3300 or TVRA 3535", "category": "Major" },
+      { "course": "COMM Concentration Area 1 course", "category": "Major" },
+      { "course": "COMM Concentration Area 2 course", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "COMM 3100 or PSYC 3120", "category": "Major" },
+      { "course": "COMM Concentration Area 3 course", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Fourth": {
+    "fall": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "COMM 3150W or TVRA 2222W", "category": "Major" },
+      { "course": "COMM Concentration Area 4*", "category": "Major" },
+      { "course": "COMM 4000 or COMM 4100", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  }
+},
+
+"Africana Studies": {
+  "First": {
+    "fall": [
+      { "course": "ENGL 1010", "category": "Pathways" },
+      { "course": "A Math & Quantitative Reasoning course", "category": "Pathways" },
+      { "course": "A AFST Introductory course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "ENGL 1012", "category": "Pathways" },
+      { "course": "A U.S. Experience in its Diversity course", "category": "Pathways" },
+      { "course": "A Individual & Society course", "category": "Pathways" },
+      { "course": "A AFST Introductory Course", "category": "General Elective" },
+      { "course": " A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Second": {
+    "fall": [
+      { "course": "A Life & Physical Sciences course", "category": "Pathways" },
+      { "course": "A Creative Expression course", "category": "Pathways" },
+      { "course": "A AFST Elective course", "category": "Major" },
+      { "course": "A AFST Elective course", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A World Cultures & Global Issues course", "category": "Pathways" },
+      { "course": "A Creative Expression course", "category": "Pathways" },
+      { "course": "A Scientific World course", "category": "Pathways" },
+      { "course": "A AFST Elective course", "category": "Major" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  },
+  "Third": {
+    "fall": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "A AFST Elective course", "category": "Major" },
+      { "course": "A AFST Elective course", "category": "Major" },
+      { "course": "A Additional Major Credit Elective course", "category": "Second Major Requirement" },
+      { "course": "A Additional Major Credit Elective course", "category": "Second Major Requirement" }
+    ],
+    "spring": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "A AFST Elective course", "category": "Major" },
+      { "course": "A Additional Major Credit Elective course", "category": "Second Major Requirement" },
+      { "course": "A Additional Major Credit Elective course", "category": "Second Major Requirement" }
+    ]
+  },
+  "Fourth": {
+    "fall": [
+      { "course": "A College Option course", "category": "Pathways" },
+      { "course": "AFST 5403W", "category": "Major" },
+      { "course": "A Additional Major Credit Elective course", "category": "Second Major Requirement" },
+      { "course": "A Additional Major Credit Elective course", "category": "Second Major Requirement" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ],
+    "spring": [
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" },
+      { "course": "A General Elective course", "category": "General Elective" }
+    ]
+  }
+}
+
+}

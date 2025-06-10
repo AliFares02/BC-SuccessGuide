@@ -1,0 +1,44 @@
+{
+  "Communication": [
+    {
+      "icon": "BsGraphUp",
+      "text": "Communications careers are expected to grow <b>6%</b> from 2023 to 2033"
+    },
+    {
+      "icon": "BsCashCoin",
+      "text": "Salaries in Communications range from <b>$50,000</b> to <b>$95,000</b>"
+    },
+    {
+      "icon": "BsTools",
+      "text": "Key skills for communications professionals include <b>public speaking</b>, <b>writing</b>, <b>digital marketing</b>, <b>social media management</b>, and <b>strategic thinking</b>."
+    }
+  ],
+  "Africana Studies": [
+    {
+      "icon": "BsGraphUp",
+      "text": "Jobs related to Africana Studies, such as community advocacy and DEI roles, are projected to grow <b>9%</b> from 2023 to 2033"
+    },
+    {
+      "icon": "BsCashCoin",
+      "text": "Salaries in Africana Studies-related fields typically range from <b>$45,000</b> to <b>$85,000</b>, depending on sector and role"
+    },
+    {
+      "icon": "BsTools",
+      "text": "Valued skills include <b>critical thinking</b>, <b>cultural competency</b>, <b>research</b>, <b>public policy analysis</b>, and <b>community engagement</b>."
+    }
+  ],
+  "Communication Sciences and Disorders": [
+    {
+      "icon": "BsGraphUp",
+      "text": "Speech-language pathology and audiology roles are expected to grow <b>19%</b> from 2023 to 2033"
+    },
+    {
+      "icon": "BsCashCoin",
+      "text": "Salaries typically range from <b>$55,000</b> to <b>$100,000+</b> in clinical and educational settings"
+    },
+    {
+      "icon": "BsTools",
+      "text": "Key skills include <b>clinical diagnosis</b>, <b>patient communication</b>, <b>therapeutic techniques</b>, and <b>compassionate care</b>."
+    }
+  ]
+}

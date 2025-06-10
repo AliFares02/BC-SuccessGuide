@@ -14,6 +14,7 @@ import {
   getListOfInactiveStudentsForCurrentSem,
   getAdminAccount,
   updateAdminAccount,
+  unenrollStudentFromCourse,
 } from "../controllers/adminController";
 
 const router = express.Router();
@@ -52,6 +53,13 @@ router.get(
   authenticateToken,
   authenticateAdmin,
   getCourseEnrollees
+);
+
+router.delete(
+  "/course/:courseCode/:studentId",
+  authenticateToken,
+  authenticateAdmin,
+  unenrollStudentFromCourse
 );
 
 router.get(

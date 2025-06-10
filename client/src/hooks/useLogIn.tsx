@@ -1,10 +1,10 @@
+import { API_BASE_URL } from "../api/config";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import useAuthContext from "./useAuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-// abstract types to module file and export when needed
 type LoginObject = {
   email: string;
   password: string;
@@ -37,14 +37,12 @@ function useLogIn() {
       setLoginLoading(false);
     } else {
       axios
-        .post("http://localhost:5000/api/users/login", {
+        .post(`${API_BASE_URL}/api/users/login`, {
           email: trimmedEmail,
           password: trimmedPassword,
         })
         .then((response) => {
           localStorage.setItem("access", response?.data?.access_token);
-          // rest of data returned from server, i.e. department, email, name, will be stored in a separate userContext since they are more related to the user and not the jwt
-          // for page refresh, authcontext will grab access from localstorage and userContext will grab access from localstorage as well and decode it to extract name, email, department, from jwt payload.
           const { _id, email, role, department } = jwtDecode<JwtPayload>(
             response?.data?.access_token
           );

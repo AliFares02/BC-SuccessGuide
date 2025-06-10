@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import useAuthContext from "../hooks/useAuthContext";
@@ -62,6 +63,7 @@ type InactiveStudent = {
   gpa: number;
 };
 function AdminActivities() {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [parsedActivities, setParsedActivities] = useState<{
     [key: string]: Activity[];
   }>({});
@@ -146,7 +148,7 @@ function AdminActivities() {
   async function getAllActivities() {
     setLoadingActivities(true);
     axios
-      .get("http://localhost:5000/api/admin/activities", {
+      .get(`${API_BASE_URL}/api/admin/activities`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },
@@ -155,9 +157,7 @@ function AdminActivities() {
         parseActivities(response.data.activities);
         setLoadingActivities(false);
       })
-      .catch((error) => {
-        console.error(error);
-      });
+      .catch((error) => {});
     setLoadingActivities(false);
   }
 
@@ -172,7 +172,7 @@ function AdminActivities() {
     } else {
       axios
         .get(
-          `http://localhost:5000/api/admin/activity/${selectedActivity?._id}/active-students`,
+          `${API_BASE_URL}/api/admin/activity/${selectedActivity?._id}/active-students`,
           {
             headers: {
               Authorization: `Bearer ${user?.access}`,
@@ -187,7 +187,7 @@ function AdminActivities() {
           setActivityActiveStudents(response.data.activeStudents);
           setLoading(false);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {});
     }
   }
 
@@ -196,7 +196,7 @@ function AdminActivities() {
     e.preventDefault();
     axios
       .post(
-        "http://localhost:5000/api/activities/create-activity",
+        `${API_BASE_URL}/api/activities/create-activity`,
         {
           ...createActivityBody,
         },
@@ -241,7 +241,7 @@ function AdminActivities() {
         updatedActivityBody;
       axios
         .patch(
-          `http://localhost:5000/api/activities/update-activity/${activityBodyExcludingStdntCt._id}`,
+          `${API_BASE_URL}/api/activities/update-activity/${activityBodyExcludingStdntCt._id}`,
           activityBodyExcludingStdntCt,
           {
             headers: {
@@ -295,7 +295,7 @@ function AdminActivities() {
   async function handleDeleteActivity() {
     axios
       .delete(
-        `http://localhost:5000/api/activities/delete-activity/${selectedActivity?._id}`,
+        `${API_BASE_URL}/api/activities/delete-activity/${selectedActivity?._id}`,
         {
           headers: {
             Authorization: `Bearer ${user?.access}`,
@@ -323,12 +323,12 @@ function AdminActivities() {
         setDeleteActivityPrompt(false);
         toast.success(response.data.msg);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {});
   }
 
   async function getListOfInactiveSemesterStudents() {
     axios
-      .get("http://localhost:5000/api/admin/semester-inactive-students", {
+      .get(`${API_BASE_URL}/api/admin/semester-inactive-students`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },
@@ -339,7 +339,7 @@ function AdminActivities() {
         );
         setInactiveStudents(response.data.studentsWithLowEngagement);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {});
   }
 
   return (

@@ -175,18 +175,6 @@ function AdminSignUpLogin() {
             >
               {signUpLoading ? <CgSpinner className="spinner" /> : "Sign up"}
             </button>
-            {/* <div>
-              <p>
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => setAuthenticationOption("login")}
-                  className="text-button"
-                >
-                  Log in
-                </button>
-              </p>
-            </div> */}
           </form>
         ) : (
           <UnAuthorizedErrorPage />

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import { Controls, Edge, Node, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import axios from "axios";
@@ -96,11 +97,10 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
   });
 
   const layoutedNodes = getLayoutedElements(nodes, edges);
-  // for refactoring, create a course context and dispatch functions related to adding, removing, getting courses
   async function addCurrentCourse(courseCode: string) {
     axios
       .post(
-        "http://localhost:5000/api/users/current-courses/add",
+        `${API_BASE_URL}/api/users/current-courses/add`,
         { courseCode },
         {
           headers: {
@@ -109,8 +109,6 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
         }
       )
       .then((response) => {
-        //response.data.msg -> for alert
-
         const updatedUICourses = optimisticUIFlowChartCourses.map((course) => {
           if (course.deptCourse.course_code === response.data.courseCode) {
             return {
@@ -129,7 +127,7 @@ function FlowChart({ flowchartCourses }: { flowchartCourses: DeptCourse[] }) {
   async function removeCurrentCourse(courseCode: string) {
     axios
       .delete(
-        `http://localhost:5000/api/users/current-courses/remove/${courseCode}`,
+        `${API_BASE_URL}/api/users/current-courses/remove/${courseCode}`,
         {
           headers: {
             Authorization: `Bearer ${user?.access}`,

@@ -1,0 +1,85 @@
+{
+  "Communication": {
+    "careers": [
+      "Google",
+      "iHeartMedia",
+      "NYC Department of Education",
+      "Minds Matter NYC",
+      "Sony",
+      "RSA Security",
+      "Federal Highway Administration",
+      "Creative Art Works",
+      "SEQ Technology",
+      "Pomelatto",
+      "NBCUniversal",
+      "Clinton Foundation",
+      "Tiffany & Co",
+      "Capital One",
+      "Giving Forward",
+      "Oppenheimer & Co",
+      "FOX",
+      "YMCA",
+      "Pratt Institute",
+      "Memorial Sloan Kettering"
+    ],
+    "graduatePrograms": [
+      "JD, Law",
+      "MA, Media Studies",
+      "MA, Public Policy",
+      "MBA, Human Resources Management and Services",
+      "PhD, Communication and Rhetoric"
+    ]
+  },
+  "Africana Studies": {
+    "careers": [
+      "Memorial Sloan Kettering Cancer Center - Clinical Research Associate",
+      "Columbia Records",
+      "The New York Immigration Coalition",
+      "Full Harvest- Software engineer",
+      "NYC Administration for Children's Services",
+      "Alfred P. Sloan Foundation",
+      "Breaking Ground",
+      "Prada",
+      "Social Security Administration",
+      "Charter School of New Castle Inc",
+      "The Learning Experience",
+      "KIPP NYC",
+      "Uncommon Schools",
+      "NYC Department of Education"
+    ],
+    "graduatePrograms": [
+      "Brooklyn Law",
+      "Brown University",
+      "Emory University",
+      "Jacobs School of Medicine and Biomedical Sciences",
+      "Pace Law School",
+      "Teachers College Columbia",
+      "University of Virginia",
+      "University of North Carolina",
+      "West Virginia University"
+    ]
+  },
+  "Communication Sciences and Disorders": {
+    "careers": [
+      "Bronx Care Health System",
+      "CareRiteCenters",
+      "Los Ninos Services",
+      "New York City Department of Education",
+      "New York City Early Intervention Agencies",
+      "Omni Rehabilitation Centers",
+      "Prime Home Health Services",
+      "St. Mary Healthcare System for Children",
+      "CUNY colleges"
+    ],
+    "graduatePrograms": [
+      "Brooklyn College (CUNY)",
+      "Teachers College, Columbia University",
+      "Columbia University",
+      "New York University (NYU)",
+      "Temple University",
+      "University of Connecticut",
+      "University of Texas at Austin",
+      "University of Washington"
+    ]
+  }
+}

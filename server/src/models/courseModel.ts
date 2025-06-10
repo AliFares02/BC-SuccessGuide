@@ -40,6 +40,10 @@ const courseSchema = new mongoose.Schema({
   course_department: {
     type: String,
   },
+  course_prerequisites: {
+    type: [String],
+    default: [],
+  },
   concentration: {
     type: String,
     enum: Object.keys(validConcentrationAreas),
@@ -72,9 +76,39 @@ const courseSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  course_prerequisites: {
-    type: [String],
-    default: [],
+  isAfstIntroductory: {
+    type: Boolean,
+    default: function (this: any) {
+      return (
+        this.course_department === "Africana Studies" &&
+        Number(this.course_code.split(" ")[1]) >= 1001 &&
+        Number(this.course_code.split(" ")[1]) <= 1099
+      );
+    },
+  },
+
+  afstGroup: {
+    type: String,
+    enum: ["a", "b", "c", null],
+    default: function (this: any) {
+      if (this.course_department !== "Africana Studies") return null;
+      const courseNum = Number(this.course_code.split(" ")[1]);
+      if (courseNum >= 3100 && courseNum <= 3199) return "a";
+      if (courseNum >= 3200 && courseNum <= 3299) return "b";
+      if (courseNum >= 3300 && courseNum <= 4399) return "c";
+      return null;
+    },
+  },
+
+  isAfstSeminar: {
+    type: Boolean,
+    default: function (this: any) {
+      if (this.course_department === "Africana Studies") {
+        const num = Number(this.course_code.split(" ")[1]);
+        return num >= 4405 && num <= 5404;
+      }
+      return false;
+    },
   },
 });
 

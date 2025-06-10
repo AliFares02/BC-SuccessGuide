@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {
@@ -21,7 +22,9 @@ type Student = {
     status: "in-progress" | "completed";
     completedAt?: string;
   }[];
+  concentration?: string;
   courses: {
+    concentration?: string;
     courseCode: string;
     grade: string;
     status: "taken" | "in-progress";
@@ -101,6 +104,15 @@ type ParsedStudent = {
     status: "in-progress";
     semester: string;
   }[];
+  concentration?: string;
+  concentrationCourses?: {
+    concentration: string;
+    courseCode: string;
+    grade: string;
+    status: "taken";
+    comment: string;
+    semester: string;
+  }[];
   department: string;
   email: string;
   gpa: number;
@@ -110,6 +122,7 @@ type ParsedStudent = {
 };
 
 function AdminDashboard() {
+  const { user } = useAuthContext();
   const [allStudents, setAllStudents] = useState<ParsedStudent[]>([]);
   const [page, setPage] = useState(1);
   const [maxPage, setMaxPage] = useState(0);
@@ -123,11 +136,12 @@ function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<
     | "current courses"
     | "past courses"
+    | "concentration courses"
     | "current activities"
     | "past activities"
   >("current courses");
   const [deleteStudentPrompt, setDeleteStudentPrompt] = useState(false);
-  const { user } = useAuthContext();
+
   useEffect(() => {
     if (user && user.role === "admin") {
       getAllStudents(1, "name", "asc");
@@ -145,30 +159,40 @@ function AdminDashboard() {
       ) as ParsedStudent["currentActivities"];
 
       const pastCourses = student.courses.filter(
-        (course) => course.status === "taken"
+        (course) => course.status === "taken" && !course.concentration
       ) as ParsedStudent["pastCourses"];
       const currentCourses = student.courses.filter(
         (course) => course.status === "in-progress"
       ) as ParsedStudent["currentCourses"];
 
-      const { activities, courses, ...restOfStudentFields } = student;
+      // parsing comm student concentration courses
+      let concentrationCourses: ParsedStudent["concentrationCourses"] = [];
+      if (student.concentration) {
+        concentrationCourses = student.courses.filter(
+          (course) => course.concentration
+        ) as ParsedStudent["concentrationCourses"];
+      }
+
+      const { activities, courses, concentration, ...restOfStudentFields } =
+        student;
       return {
         ...restOfStudentFields,
         pastActivities: pastActivities,
         currentActivities: currentActivities,
         pastCourses: pastCourses,
         currentCourses: currentCourses,
+        ...(concentration && { concentration }),
+        ...(concentrationCourses &&
+          concentrationCourses.length > 0 && { concentrationCourses }),
       };
     });
-    console.log("here are the parsedStudents", parsedStudents);
-
     setAllStudents(parsedStudents);
   }
 
   async function getAllStudents(page: number, sortBy: string, order: string) {
     axios
       .get(
-        `http://localhost:5000/api/admin/students/?page=${page}&sortBy=${sortBy}&order=${order}`,
+        `${API_BASE_URL}/api/admin/students/?page=${page}&sortBy=${sortBy}&order=${order}`,
         {
           headers: {
             Authorization: `Bearer ${user?.access}`,
@@ -176,23 +200,19 @@ function AdminDashboard() {
         }
       )
       .then((response) => {
-        console.log("get all students", response);
         setMaxPage(response.data.totalPages);
         parseStudents(response.data.students);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {});
   }
 
   async function handleDeleteStudent() {
     axios
-      .delete(
-        `http://localhost:5000/api/users/delete-user/${selectedStudent?._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.access}`,
-          },
-        }
-      )
+      .delete(`${API_BASE_URL}/api/users/delete-user/${selectedStudent?._id}`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
       .then((response) => {
         const removedStudent = response.data.id;
         setAllStudents((prev) =>
@@ -202,18 +222,18 @@ function AdminDashboard() {
         setSelectedCategory("current courses");
         setDeleteStudentPrompt(false);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {});
   }
 
   async function getAvgStudentGPA() {
     axios
-      .get("http://localhost:5000/api/admin/average-student-gpa", {
+      .get(`${API_BASE_URL}/api/admin/average-student-gpa`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },
       })
       .then((response) => setAverageStudentGPA(response.data.averageGPA))
-      .catch((error) => console.error(error));
+      .catch((error) => {});
   }
   return (
     <div className="admin-dashboard-container">
@@ -352,6 +372,25 @@ function AdminDashboard() {
                         Completed courses
                       </label>
 
+                      {selectedStudent.concentration ? (
+                        <>
+                          <label
+                            className={`tab ${
+                              selectedCategory === "concentration courses"
+                                ? "selected"
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setSelectedComment(null);
+                              setSelectedCategory("concentration courses");
+                              setDeleteStudentPrompt(false);
+                            }}
+                          >
+                            Concentration courses
+                          </label>
+                        </>
+                      ) : null}
+
                       <label
                         className={`tab ${
                           selectedCategory === "current activities"
@@ -414,6 +453,45 @@ function AdminDashboard() {
                                 </div>
                               </li>
                             ))
+                          ) : (
+                            <li>No completed courses found</li>
+                          )
+                        ) : selectedCategory === "concentration courses" ? (
+                          selectedStudent.concentrationCourses &&
+                          selectedStudent.concentrationCourses.length > 0 ? (
+                            <>
+                              <p
+                                style={{
+                                  margin: "0 0 .75rem 0",
+                                  textAlign: "center",
+                                }}
+                              >
+                                Concentration:{" "}
+                                <span style={{ fontWeight: "600" }}>
+                                  {selectedStudent.concentration}
+                                </span>
+                              </p>
+                              {selectedStudent.concentrationCourses.map(
+                                (course) => (
+                                  <li key={course.courseCode}>
+                                    <div className="admin-student-li-item-wrapper">
+                                      &#8640; {course.courseCode}
+                                      {course.comment && (
+                                        <MdOutlineComment
+                                          onClick={() =>
+                                            setSelectedComment(course.comment)
+                                          }
+                                        />
+                                      )}
+                                      <span className="dots"></span>
+                                      <p style={{ margin: "0 .5rem 0 auto" }}>
+                                        {course.grade}
+                                      </p>
+                                    </div>
+                                  </li>
+                                )
+                              )}
+                            </>
                           ) : (
                             <li>No completed courses found</li>
                           )
@@ -537,7 +615,7 @@ function AdminDashboard() {
               <MdNavigateBefore />
             </button>
             <button
-              disabled={page === maxPage}
+              disabled={page === maxPage || page > maxPage}
               onClick={() => {
                 getAllStudents(page + 1, sortValue, order);
                 setPage((prev) => prev + 1);

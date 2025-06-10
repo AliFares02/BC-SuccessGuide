@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import React, { useState } from "react";
 import { CgSpinner } from "react-icons/cg";
@@ -23,7 +24,7 @@ function ResetPassword() {
       setError("Passwords don't match");
     } else {
       axios
-        .post(`http://localhost:5000/api/users/reset-password/${token}`, {
+        .post(`${API_BASE_URL}/api/users/reset-password/${token}`, {
           newPassword: password,
         })
         .then((response) => {

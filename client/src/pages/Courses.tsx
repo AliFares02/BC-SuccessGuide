@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import useAuthContext from "../hooks/useAuthContext";
@@ -5,11 +6,22 @@ import {
   MdOutlinePlaylistAddCheck,
   MdOutlinePlaylistRemove,
   MdOutlineEditNote,
+  MdOutlineEdit,
+  MdInfo,
 } from "react-icons/md";
 import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import { HiMiniMinus } from "react-icons/hi2";
-import getSemester from "../utils/getCurrentSemesterWithYear";
+import {
+  getCurrentSemesterWithYear,
+  generateAvailableSemesters,
+} from "../utils/getCurrentSemesterWithYear";
+import {
+  semesterInAdv,
+  semesterInAdvWithYr,
+} from "../utils/getNextSemesterRecommendedCourseStructure";
+import recommendedCourses from "../utils/recommendedCourseStructure.json";
+import { useLocation } from "react-router-dom";
 
 interface PastCourse {
   courseCode: string;
@@ -20,7 +32,8 @@ interface PastCourse {
 }
 
 function Courses() {
-  const currentSemester = getSemester();
+  const location = useLocation();
+  const currentSemester = getCurrentSemesterWithYear();
   const [pastCourses, setPastCourses] = useState<{
     past_courses: PastCourse[];
     gpa: number;
@@ -37,6 +50,9 @@ function Courses() {
     comment?: string;
   } | null>(null);
   const [gpa, setGpa] = useState(0);
+  const [recommendedCourseStructure, setRecommendedCourseStructure] = useState(
+    []
+  );
   const [desiredGPA, setDesiredGPA] = useState("");
   const [achievableDesiredGPAMsg, setAchievableDesiredGPAMsg] = useState("");
   const [desiredGPAError, setDesiredGPAError] = useState<string | null>(null);
@@ -55,12 +71,28 @@ function Courses() {
   } | null>(null);
   const [gradeRecieved, setGradeRecieved] = useState("");
 
+  const [afstAdditionalCourses, setAfstAdditionalCourses] = useState<
+    { courseCode: string; grade: String; semester_completed: string }[]
+  >([]);
+
+  const [editPastCourseSemester, setEditPastCourseSemester] = useState<{
+    courseCode: string;
+    idx: number;
+  } | null>(null);
+  const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
+  const [newPastCourseSemester, setNewPastCourseSemester] = useState("");
+
   const { user, tkFetchLoading } = useAuthContext();
 
   useEffect(() => {
     if (!tkFetchLoading) {
       if (user?.access) {
         getCourses();
+        if (user?.department === "Africana Studies") {
+          getAfstAdditionalCreditCourses();
+        }
+        // these will be used to get recommended course structure.
+        getStudentYear();
       }
     }
   }, []);
@@ -78,17 +110,25 @@ function Courses() {
     }
   }, [selectedCourseComment]);
 
-  async function getCourses() {
-    const pastCoursesReq = axios.get(
-      "http://localhost:5000/api/users/past-courses",
-      {
-        headers: {
-          Authorization: `Bearer ${user?.access}`,
-        },
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1));
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 0);
       }
-    );
+    }
+  }, [location]);
+
+  async function getCourses() {
+    const pastCoursesReq = axios.get(`${API_BASE_URL}/api/users/past-courses`, {
+      headers: {
+        Authorization: `Bearer ${user?.access}`,
+      },
+    });
     const currCoursesReq = axios.get(
-      "http://localhost:5000/api/users/current-courses",
+      `${API_BASE_URL}/api/users/current-courses`,
       {
         headers: {
           Authorization: `Bearer ${user?.access}`,
@@ -96,7 +136,7 @@ function Courses() {
       }
     );
     const incompleteCoursesReq = axios.get(
-      "http://localhost:5000/api/users/incomplete-courses",
+      `${API_BASE_URL}/api/users/incomplete-courses`,
       {
         headers: {
           Authorization: `Bearer ${user?.access}`,
@@ -117,10 +157,20 @@ function Courses() {
           setWhatIfCourses(incompleteCoursesRes.data?.inCompleteCourses);
         })
       )
-      .catch((error) => console.error(error));
+      .catch((error) => {});
+  }
+
+  function getRecommendedCourseStructure(studentYr: string) {
+    if (user?.department) {
+      const nextSemRecommendedCourseStructure = (recommendedCourses as any)[
+        user.department
+      ][studentYr][semesterInAdv.toLowerCase()];
+      setRecommendedCourseStructure(nextSemRecommendedCourseStructure);
+    }
   }
 
   async function calculateDesiredGPA() {
+    setAchievableDesiredGPAMsg("");
     const desiredGPAasNumber = Number(desiredGPA);
     if (desiredGPAasNumber < 0 || desiredGPAasNumber > 4) {
       setDesiredGPAError("Desired gpa must be between 0 and 4.0");
@@ -128,7 +178,7 @@ function Courses() {
       setDesiredGPAError(null);
       axios
         .post(
-          "http://localhost:5000/api/users/desired-gpa",
+          `${API_BASE_URL}/api/users/desired-gpa`,
           {
             desiredGPA,
           },
@@ -139,14 +189,17 @@ function Courses() {
           }
         )
         .then((response) => setAchievableDesiredGPAMsg(response.data.msg))
-        .catch((error) => setDesiredGPAError(error.response.data.error));
+        .catch((error) => {
+          setDesiredGPAError(error.response.data.error);
+          setAchievableDesiredGPAMsg("");
+        });
     }
   }
 
   async function calculateEstimatedGPA() {
     axios
       .post(
-        "http://localhost:5000/api/users/estimated-gpa",
+        `${API_BASE_URL}/api/users/estimated-gpa`,
         {
           whatIfCourses,
         },
@@ -161,7 +214,7 @@ function Courses() {
         setEstimatedGPAMsg(response.data.msg || "");
       })
       .catch((error) => {
-        toast.error(error.response.data.error);
+        toast.error(error.response.data.msg || error.response.data.error);
       });
   }
 
@@ -187,9 +240,10 @@ function Courses() {
       if (gradeRecieved.trim() !== "") {
         axios
           .post(
-            `http://localhost:5000/api/users/past-courses/add/${courseCode}`,
+            `${API_BASE_URL}/api/users/past-courses/add/${courseCode}`,
             {
               grade: gradeRecieved,
+              // change semester to semester that user manually adds
               semester: currentSemester,
             },
             {
@@ -226,16 +280,52 @@ function Courses() {
 
             setCurrCourses(updatedCurrCourses);
             const updatedIncompleteCourses = incompleteCourses.filter(
-              (incompleteCourse) =>
-                incompleteCourse.courseCode !==
-                response.data.returnedCourse.courseCode
+              (incompleteCourse) => {
+                if (response.data.returnedCourse.courseCode === "COMM 4100") {
+                  return (
+                    incompleteCourse.courseCode !==
+                      response.data.returnedCourse.courseCode &&
+                    incompleteCourse.courseCode !== "COMM 4000"
+                  );
+                } else if (
+                  response.data.returnedCourse.courseCode === "COMM 4000"
+                ) {
+                  return (
+                    incompleteCourse.courseCode !==
+                      response.data.returnedCourse.courseCode &&
+                    incompleteCourse.courseCode !== "COMM 4100"
+                  );
+                }
+                return (
+                  incompleteCourse.courseCode !==
+                  response.data.returnedCourse.courseCode
+                );
+              }
             );
             setIncompleteCourses(updatedIncompleteCourses);
 
             const updatedWhatIfCourses = whatIfCourses.filter(
-              (whatIfCourse) =>
-                whatIfCourse.courseCode !==
-                response.data.returnedCourse.courseCode
+              (whatIfCourse) => {
+                if (response.data.returnedCourse.courseCode === "COMM 4100") {
+                  return (
+                    whatIfCourse.courseCode !==
+                      response.data.returnedCourse.courseCode &&
+                    whatIfCourse.courseCode !== "COMM 4000"
+                  );
+                } else if (
+                  response.data.returnedCourse.courseCode === "COMM 4000"
+                ) {
+                  return (
+                    whatIfCourse.courseCode !==
+                      response.data.returnedCourse.courseCode &&
+                    whatIfCourse.courseCode !== "COMM 4100"
+                  );
+                }
+                return (
+                  whatIfCourse.courseCode !==
+                  response.data.returnedCourse.courseCode
+                );
+              }
             );
             setWhatIfCourses(updatedWhatIfCourses);
 
@@ -254,14 +344,11 @@ function Courses() {
 
   async function handleRemovePastCourse(courseCode: string) {
     axios
-      .delete(
-        `http://localhost:5000/api/users/past-courses/remove/${courseCode}`,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.access}`,
-          },
-        }
-      )
+      .delete(`${API_BASE_URL}/api/users/past-courses/remove/${courseCode}`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
       .then((response) => {
         const updatedPastCourses = pastCourses.past_courses.filter(
           (course) => course.courseCode !== response.data.courseCode
@@ -276,21 +363,46 @@ function Courses() {
         );
 
         if (!courseExistsInIncompleteCourses) {
-          setIncompleteCourses([
-            ...incompleteCourses,
-            { courseCode: response.data.courseCode },
-          ]);
+          if (
+            response.data.courseCode === "COMM 4000" ||
+            response.data.courseCode === "COMM 4100"
+          ) {
+            const otherCourseCode =
+              courseCode === "COMM 4000" ? "COMM 4100" : "COMM 4000";
+            setIncompleteCourses([
+              ...incompleteCourses,
+              { courseCode: response.data.courseCode },
+              { courseCode: otherCourseCode },
+            ]);
+          } else {
+            setIncompleteCourses([
+              ...incompleteCourses,
+              { courseCode: response.data.courseCode },
+            ]);
+          }
         }
         const courseExistsInWhatIfCourses = whatIfCourses.find(
           (course) => course.courseCode === response.data.courseCode
         );
         if (!courseExistsInWhatIfCourses) {
-          setWhatIfCourses([
-            ...whatIfCourses,
-            { courseCode: response.data.courseCode },
-          ]);
+          if (
+            response.data.courseCode === "COMM 4000" ||
+            response.data.courseCode === "COMM 4100"
+          ) {
+            const otherCourseCode =
+              courseCode === "COMM 4000" ? "COMM 4100" : "COMM 4000";
+            setWhatIfCourses([
+              ...whatIfCourses,
+              { courseCode: response.data.courseCode },
+              { courseCode: otherCourseCode },
+            ]);
+          } else {
+            setWhatIfCourses([
+              ...whatIfCourses,
+              { courseCode: response.data.courseCode },
+            ]);
+          }
         }
-
         toast.success(response.data.msg);
       })
       .catch((error) => toast.error(error.response.data.msg));
@@ -304,7 +416,7 @@ function Courses() {
       case "save":
         axios
           .patch(
-            `http://localhost:5000/api/users/${course_code}/edit-comment`,
+            `${API_BASE_URL}/api/users/${course_code}/edit-comment`,
             {
               comment: newCommentBody?.comment,
             },
@@ -338,7 +450,7 @@ function Courses() {
       case "delete":
         axios
           .patch(
-            `http://localhost:5000/api/users/${course_code}/edit-comment`,
+            `${API_BASE_URL}/api/users/${course_code}/edit-comment`,
             {
               comment: "",
             },
@@ -367,9 +479,137 @@ function Courses() {
             toast.success(response.data.msg);
             setSelectedCourseComment(null);
           })
-          .catch((error) => toast.error(error.response.data.msg));
+          .catch((error) =>
+            toast.error(error.response.data.msg || error.response.data.error)
+          );
       default:
     }
+  }
+
+  async function getAfstAdditionalCreditCourses() {
+    axios
+      .get(`${API_BASE_URL}/api/users/afst-additional-major/courses`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
+      .then((response) =>
+        setAfstAdditionalCourses(response.data.additionalCourses)
+      )
+      .catch((error) => {});
+  }
+
+  async function handleRemovePastAfstAddCourse(courseCode: string) {
+    axios
+      .delete(
+        `${API_BASE_URL}/api/users/afst-additional-major/delete-course/${courseCode}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        const removedCourseCode = response.data.removedCourseCode;
+        setAfstAdditionalCourses((prev) =>
+          prev.filter((course) => course.courseCode !== removedCourseCode)
+        );
+        toast.success(response.data.msg);
+      })
+      .catch((error) =>
+        toast.error(error.response.data.msg || error.response.data.error)
+      );
+  }
+
+  async function getStudentYear() {
+    axios
+      .get(`${API_BASE_URL}/api/users/account/year`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
+      .then((response) => {
+        const currentSemester = getCurrentSemesterWithYear();
+        const availableSemesters = generateAvailableSemesters(
+          currentSemester,
+          response.data.studentYear
+        );
+        setAvailableSemesters(availableSemesters);
+        getRecommendedCourseStructure(response.data.studentYear);
+      })
+      .catch((error) =>
+        toast.error(error.response.data.msg || error.response.data.error)
+      );
+  }
+
+  function handlePastCourseSemesterChange(
+    courseCode: string,
+    isAfstAdditionalCredCourse: boolean,
+    semester: string
+  ) {
+    if (newPastCourseSemester === "") {
+      toast.error("Must select a semester");
+      return;
+    }
+
+    if (semester === newPastCourseSemester) {
+      toast.error("New semester must be different");
+      return;
+    }
+
+    axios
+      .patch(
+        `${API_BASE_URL}/api/users/past-courses/edit-semester/${courseCode}`,
+        {
+          isAfstAdditionalCredCourse,
+          newSemester: newPastCourseSemester,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.access}`,
+          },
+        }
+      )
+      .then((response) => {
+        const courseCode = response.data.courseCode;
+        const updatedSemester = response.data.updatedSemester;
+        if (response.data?.isAfstAddCredCourse) {
+          setAfstAdditionalCourses((prev) =>
+            prev.map((course) => {
+              if (course.courseCode === courseCode) {
+                return {
+                  ...course,
+                  semester_completed: updatedSemester,
+                };
+              }
+              return course;
+            })
+          );
+        } else {
+          setPastCourses((prev) => {
+            const courseWithUpdatedSemester = prev.past_courses.map(
+              (course) => {
+                if (course.courseCode === courseCode) {
+                  return {
+                    ...course,
+                    semester: updatedSemester,
+                  };
+                }
+                return course;
+              }
+            );
+            return {
+              ...prev,
+              past_courses: courseWithUpdatedSemester,
+            };
+          });
+        }
+        toast.success(response.data.msg);
+        setEditPastCourseSemester(null);
+      })
+      .catch((error) =>
+        toast.error(error.response.data.msg || error.response.data.error)
+      );
   }
 
   return (
@@ -513,7 +753,87 @@ function Courses() {
                       </div>
                     </td>
                     <td>{course.grade}</td>
-                    <td>{course.semester}</td>
+                    <td>
+                      <div className="past-courses-table-semester-wrapper">
+                        {editPastCourseSemester &&
+                        editPastCourseSemester.courseCode ===
+                          course.courseCode &&
+                        editPastCourseSemester.idx === idx ? (
+                          <select
+                            value={newPastCourseSemester}
+                            onChange={(e) =>
+                              setNewPastCourseSemester(e.target.value)
+                            }
+                          >
+                            <option value=""></option>
+                            {availableSemesters &&
+                              availableSemesters.map((semester) => (
+                                <option key={semester}>{semester}</option>
+                              ))}
+                          </select>
+                        ) : (
+                          course.semester
+                        )}{" "}
+                        {editPastCourseSemester &&
+                        editPastCourseSemester.courseCode ===
+                          course.courseCode &&
+                        editPastCourseSemester.idx === idx ? (
+                          <div style={{ display: "flex", gap: ".5rem" }}>
+                            <button
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: "0",
+                                fontSize: "1rem",
+                              }}
+                              onClick={() =>
+                                handlePastCourseSemesterChange(
+                                  course.courseCode,
+                                  false,
+                                  course.semester
+                                )
+                              }
+                            >
+                              ✅
+                            </button>
+                            <button
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: "0",
+                                fontSize: "1rem",
+                              }}
+                              onClick={() => setEditPastCourseSemester(null)}
+                            >
+                              ❌
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <Tooltip
+                              id="edit-past-course-semester"
+                              place="top"
+                            />
+                            <button
+                              type="button"
+                              className="edit-course-semester-btn"
+                              data-tooltip-id="edit-past-course-semester"
+                              data-tooltip-content="Edit semester"
+                              onClick={() =>
+                                setEditPastCourseSemester({
+                                  courseCode: course.courseCode,
+                                  idx: idx,
+                                })
+                              }
+                            >
+                              <MdOutlineEdit />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -592,14 +912,207 @@ function Courses() {
               {gpa > 0 ? gpa : "N/A"}
             </p>
           </div>
-          <div className="current-gpa-color-bar-container">
-            <div className="current-gpa-color-bar"></div>
-          </div>
+        </div>
+        {user?.department === "Africana Studies" ? (
+          afstAdditionalCourses ? (
+            <>
+              <p className="page-sub-title" style={{ marginTop: "7.5rem" }}>
+                Additional credit courses
+              </p>
+              <div className="afst-additional-courses-table-wrapper">
+                <table className="past-courses-table">
+                  <thead>
+                    <tr>
+                      <th>Course</th>
+                      <th>Grade</th>
+                      <th>Semester</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {afstAdditionalCourses &&
+                    afstAdditionalCourses.length > 0 ? (
+                      afstAdditionalCourses.map((course, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <div className="curr-courses-table-course-code-wrapper">
+                              <p>{course.courseCode}</p>
+                              <Tooltip
+                                id="remove-past-afst-course"
+                                place="top"
+                              />
+                              <MdOutlinePlaylistRemove
+                                data-tooltip-id="remove-past-afst-course"
+                                data-tooltip-content="Remove course"
+                                className="remove-past-course-icon"
+                                onClick={() =>
+                                  handleRemovePastAfstAddCourse(
+                                    course.courseCode
+                                  )
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td>{course.grade}</td>
+                          <td>
+                            <div className="past-afst-table-course-semester-wrapper">
+                              {editPastCourseSemester &&
+                              editPastCourseSemester.courseCode ===
+                                course.courseCode &&
+                              editPastCourseSemester.idx === idx ? (
+                                <select
+                                  value={newPastCourseSemester}
+                                  onChange={(e) =>
+                                    setNewPastCourseSemester(e.target.value)
+                                  }
+                                >
+                                  <option value=""></option>
+                                  {availableSemesters &&
+                                    availableSemesters.map((semester) => (
+                                      <option key={semester}>{semester}</option>
+                                    ))}
+                                </select>
+                              ) : (
+                                course.semester_completed
+                              )}{" "}
+                              {editPastCourseSemester &&
+                              editPastCourseSemester.courseCode ===
+                                course.courseCode &&
+                              editPastCourseSemester.idx === idx ? (
+                                <div style={{ display: "flex", gap: ".5rem" }}>
+                                  <button
+                                    style={{
+                                      background: "transparent",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      padding: "0",
+                                      fontSize: "1rem",
+                                    }}
+                                    onClick={() =>
+                                      handlePastCourseSemesterChange(
+                                        course.courseCode,
+                                        true,
+                                        course.semester_completed
+                                      )
+                                    }
+                                  >
+                                    ✅
+                                  </button>
+                                  <button
+                                    style={{
+                                      background: "transparent",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      padding: "0",
+                                      fontSize: "1rem",
+                                    }}
+                                    onClick={() =>
+                                      setEditPastCourseSemester(null)
+                                    }
+                                  >
+                                    ❌
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <Tooltip
+                                    id="edit-past-afst-course-semester"
+                                    place="top"
+                                  />
+                                  <button
+                                    type="button"
+                                    className="edit-course-semester-btn"
+                                    data-tooltip-id="edit-past-afst-course-semester"
+                                    data-tooltip-content="Edit semester"
+                                    onClick={() =>
+                                      setEditPastCourseSemester({
+                                        courseCode: course.courseCode,
+                                        idx: idx,
+                                      })
+                                    }
+                                  >
+                                    <MdOutlineEdit />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td style={{ textAlign: "center" }} colSpan={3}>
+                          No past additional credit courses
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : null
+        ) : null}
+      </div>
+
+      <div
+        className="recommended-course-structure-container"
+        id="recommended-course-structure-section"
+      >
+        <p className="page-sub-title">
+          Recommended course structure for {semesterInAdvWithYr}
+        </p>
+        <div className="recommended-courses-table-wrapper">
+          <table className="recommended-courses-table">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recommendedCourseStructure &&
+              recommendedCourseStructure.length > 0 ? (
+                (
+                  recommendedCourseStructure as {
+                    course: string;
+                    category: string;
+                  }[]
+                ).map((course, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      <p>{course.course}</p>
+                    </td>
+                    <td>{course.category}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td style={{ textAlign: "center" }} colSpan={3}>
+                    No recommended courses found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
       <div className="desired-gpa-estimator-container">
         <p className="page-sub-title">What If</p>
         <div className="desired-gpa-estimator-sub-container">
+          <Tooltip
+            id="what-if-tools-more-info"
+            place="top"
+            style={{
+              zIndex: "1500",
+              whiteSpace: "normal",
+              maxWidth: "250px",
+            }}
+          />
+          <MdInfo
+            data-tooltip-id="what-if-tools-more-info"
+            data-tooltip-content="Use the Desired GPA Checker to see if your goal GPA is possible, and the GPA Estimator to predict your GPA based on potential future grades."
+            className="what-if-tools-more-info"
+          />
           <p className="container-title">Achievable desired GPA checker</p>
           <div className="achievable-desired-gpa-content-subcontainer">
             <p className="container-sub-title">Enter desired GPA:</p>
@@ -634,6 +1147,41 @@ function Courses() {
             id="desired-gpa-courses-table-wrapper"
             className="desired-gpa-courses-table-wrapper"
           >
+            {user?.department === "Communication" ? (
+              <>
+                <Tooltip
+                  id="what-if-tools-future-gpa-more-info"
+                  place="top"
+                  style={{
+                    zIndex: "1500",
+                    whiteSpace: "normal",
+                    maxWidth: "250px",
+                  }}
+                />
+                <MdInfo
+                  data-tooltip-id="what-if-tools-future-gpa-more-info"
+                  data-tooltip-content="Non-COMM courses are randomly picked from your remaining concentration areas, or from a random concentration if you haven't chosen one yet."
+                  className="what-if-tools-future-gpa-more-info"
+                />
+              </>
+            ) : user?.department === "Africana Studies" ? (
+              <>
+                <Tooltip
+                  id="what-if-tools-future-gpa-more-info"
+                  place="top"
+                  style={{
+                    zIndex: "1500",
+                    whiteSpace: "normal",
+                    maxWidth: "250px",
+                  }}
+                />
+                <MdInfo
+                  data-tooltip-id="what-if-tools-future-gpa-more-info"
+                  data-tooltip-content="The courses below are the remaining credit requirement courses randomly selected from each category you haven't fulfilled. Additional credit courses don't apply to your core GPA so they are irrelevant here."
+                  className="what-if-tools-future-gpa-more-info"
+                />
+              </>
+            ) : null}
             <table className="desired-gpa-courses-table">
               <thead>
                 <tr>
@@ -644,39 +1192,75 @@ function Courses() {
               <tbody>
                 {incompleteCourses && incompleteCourses.length > 0 ? (
                   (incompleteCourses as { courseCode: string }[]).map(
-                    (incompleteCourse) => (
-                      <tr key={incompleteCourse.courseCode}>
-                        <td>{incompleteCourse.courseCode}</td>
-                        <td>
-                          <select
-                            className="potential-grade-selector"
-                            name="grade-selector"
-                            id="grade-selector"
-                            onChange={(e) =>
-                              handlePotentialGradeChange(
-                                e,
-                                incompleteCourse.courseCode
-                              )
-                            }
-                          >
-                            <option value=""></option>
-                            <option value="A+">A+</option>
-                            <option value="A">A</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B">B</option>
-                            <option value="B-">B-</option>
-                            <option value="C+">C+</option>
-                            <option value="C">C</option>
-                            <option value="C-">C-</option>
-                            <option value="D+">D+</option>
-                            <option value="D">D</option>
-                            <option value="D-">D</option>
-                            <option value="F">F</option>
-                          </select>
-                        </td>
-                      </tr>
-                    )
+                    (incompleteCourse) => {
+                      const courseCode = incompleteCourse.courseCode;
+                      let disableCommInternshipCourse = false;
+                      if (
+                        courseCode === "COMM 4000" &&
+                        whatIfCourses.find(
+                          (course) => course.courseCode === "COMM 4100"
+                        )?.estimatedGrade
+                      ) {
+                        disableCommInternshipCourse = true;
+                      } else if (
+                        courseCode === "COMM 4100" &&
+                        whatIfCourses.find(
+                          (course) => course.courseCode === "COMM 4000"
+                        )?.estimatedGrade
+                      ) {
+                        disableCommInternshipCourse = true;
+                      }
+                      return (
+                        <tr key={incompleteCourse.courseCode}>
+                          <td>{incompleteCourse.courseCode}</td>
+                          <td>
+                            {disableCommInternshipCourse && (
+                              <Tooltip
+                                id="internship-grade-selector"
+                                place="top"
+                              />
+                            )}
+                            <select
+                              data-tooltip-id={
+                                disableCommInternshipCourse
+                                  ? "internship-grade-selector"
+                                  : undefined
+                              }
+                              data-tooltip-content={
+                                disableCommInternshipCourse
+                                  ? "Can set grade for only one internship course."
+                                  : undefined
+                              }
+                              className="potential-grade-selector"
+                              name="grade-selector"
+                              id="grade-selector"
+                              onChange={(e) =>
+                                handlePotentialGradeChange(
+                                  e,
+                                  incompleteCourse.courseCode
+                                )
+                              }
+                              disabled={disableCommInternshipCourse}
+                            >
+                              <option value=""></option>
+                              <option value="A+">A+</option>
+                              <option value="A">A</option>
+                              <option value="A-">A-</option>
+                              <option value="B+">B+</option>
+                              <option value="B">B</option>
+                              <option value="B-">B-</option>
+                              <option value="C+">C+</option>
+                              <option value="C">C</option>
+                              <option value="C-">C-</option>
+                              <option value="D+">D+</option>
+                              <option value="D">D</option>
+                              <option value="D-">D</option>
+                              <option value="F">F</option>
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    }
                   )
                 ) : (
                   <tr>
@@ -703,39 +1287,6 @@ function Courses() {
               <p>Estimated GPA: {estimatedGPA}</p>
             </div>
           ) : null}
-        </div>
-      </div>
-      <div className="recommended-course-structure-container">
-        <p className="page-sub-title">
-          Recommended course structure for Fall 2025
-        </p>
-        <div className="recommended-courses-table-wrapper">
-          <table className="recommended-courses-table">
-            <thead>
-              <tr>
-                <th>Course</th>
-                <th>Difficulty</th>
-                <th>Semester</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>ENGL 1012</td>
-                <td>Medium</td>
-                <td>Fall 2025</td>
-              </tr>
-              <tr>
-                <td>COMM 2100</td>
-                <td>Medium</td>
-                <td>Fall 2025</td>
-              </tr>
-              <tr>
-                <td>COMM 3200</td>
-                <td>Hard</td>
-                <td>Fall 2025</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>

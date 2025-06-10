@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import React from "react";
 import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -38,7 +39,7 @@ function useAdminSignUp() {
     } else {
       axios
         .post(
-          "http://localhost:5000/api/admin/sign-up",
+          `${API_BASE_URL}/api/admin/sign-up`,
           {
             email: trimmedEmail,
             password: trimmedPassword,

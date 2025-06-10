@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import React, { useEffect, useState } from "react";
 import useAuthContext from "../hooks/useAuthContext";
 import axios from "axios";
@@ -46,7 +47,7 @@ function AccountSettings() {
   }, [studentAcctInfo]);
   async function getStudentAccount() {
     axios
-      .get("http://localhost:5000/api/users/account", {
+      .get(`${API_BASE_URL}/api/users/account`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },
@@ -96,7 +97,7 @@ function AccountSettings() {
 
     axios
       .patch(
-        "http://localhost:5000/api/users/update-account",
+        `${API_BASE_URL}/api/users/update-account`,
         {
           updatedStudentAcctInfo,
         },
@@ -115,13 +116,12 @@ function AccountSettings() {
       .catch((error) => {
         setUpdateStudentLoading(false);
         setUpdateStudentAccountError(error.response.data.msg);
-        console.error(error);
       });
   }
 
   async function deleteStudentAccount() {
     axios
-      .delete(`http://localhost:5000/api/users/delete-user/${user?._id}`, {
+      .delete(`${API_BASE_URL}/api/users/delete-user/${user?._id}`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FcHighPriority, FcLowPriority } from "react-icons/fc";
@@ -13,13 +14,14 @@ import { toast } from "react-toastify";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import useAuthContext from "../hooks/useAuthContext";
-import getSemester from "../utils/getCurrentSemesterWithYear";
+import { getCurrentSemesterWithYear } from "../utils/getCurrentSemesterWithYear";
+import alumniDestination from "../utils/alumniDestination.json";
+import organizations from "../utils/organizations.json";
 
 function DegreeRoadMap() {
   const { user, tkFetchLoading } = useAuthContext();
-  const currentSemesterWYr = getSemester();
-
-  const [error, setError] = useState(null);
+  const currentSemesterWYr = getCurrentSemesterWithYear();
+  const [studentYr, setStudentYr] = useState("");
   const [parsedActivities, setParsedActivities] = useState<{
     [key: string]: Activity[];
   }>({});
@@ -37,82 +39,41 @@ function DegreeRoadMap() {
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [numOfActivitiesCompleted, setNumOfActivitiesCompleted] = useState(0);
   const [numOfTotalActivities, setNumOfTotalActivities] = useState(0);
-  const categories = [
-    "General",
-    "Media",
-    "Emergency, Crisis & RiskCommunication",
-    "Sports",
-    "Journalism",
-    "Public Relations",
-    "Social Media",
-  ];
-  const subCategories: Record<number, string[]> = {
-    0: [
-      "Center for Communication",
-      "International Association of Business Communicators",
-      "National Association of Government Communicators",
-      "National Communication Association",
-      "New York Women in Communications",
-      "Toastmasters International",
-    ],
-    1: [
-      "Emma Bowen Foundation (EBF)",
-      "International Radio & Television Society Foundation (IRTS)",
-      "National Association for Multi-ethnicity in Communications(NAMIC)",
-      "National Association of Broadcasters",
-    ],
-    2: [
-      "American Society for Health Care Risk Management",
-      "Association of Healthcare Emergency Preparedness Professionals",
-      "Association of Public-Safety Communications Officials (APCO International)",
-      "International Association of Emergency Managers",
-      "International Association of Risk and Crisis Communication (IARCC)",
-    ],
-    3: [
-      "Association for Women in Sports Media",
-      "College Sports Communicators",
-      "National Sports Media Association",
-      "North American Society for Sport Management",
-      "Sport Marketing Association",
-    ],
-    4: [
-      "Asian American Journalists Association",
-      "Association of LGBTQ+ Journalists",
-      "Indigenous Journalists Association",
-      "National Association of Hispanic Journalists",
-      "National Association of Black Journalists",
-      "National Press Club",
-      "Religion News Association",
-      "Society of Environmental Journalists",
-      "Society of Professional Journalists",
-    ],
-    5: [
-      "Hispanic Public Relations Association",
-      "International Public Relations Association",
-      "National Black Public Relations Society (NBPRS)",
-      "Public Relations Society of America (PRSA)",
-      "Public Relations Student Society of America (PRSSA)",
-    ],
-    6: ["American Association of Social Media Professionals"],
-  };
+
+  const department = user?.department as keyof typeof organizations;
+  const categories = Object.keys(organizations[department]);
+
+  const selectedCategoryName = categories[
+    selectedCategory
+  ] as keyof (typeof organizations)[typeof department];
+  const items = organizations[department][selectedCategoryName] as string[];
 
   useEffect(() => {
-    if (!tkFetchLoading) {
-      if (user?.access) {
-        getActivities();
-      }
+    if (!tkFetchLoading && user?.access) {
+      getStudentYear();
     }
   }, []);
 
   useEffect(() => {
-    if (selectedNoteComment) {
-      setNewNoteBody({
-        activityCategory: selectedNoteComment.activityCategory,
-        activityId: selectedNoteComment.activityId,
-        comment: selectedNoteComment.comment,
-      });
+    if (studentYr) {
+      getActivities();
     }
-  }, [selectedNoteComment]);
+  }, [studentYr]);
+
+  async function getStudentYear() {
+    axios
+      .get(`${API_BASE_URL}/api/users/account/year`, {
+        headers: {
+          Authorization: `Bearer ${user?.access}`,
+        },
+      })
+      .then((response) => {
+        setStudentYr(response.data.studentYear);
+      })
+      .catch((error) =>
+        toast.error(error.response.data.msg || error.response.data.error)
+      );
+  }
 
   interface Activity {
     activity: {
@@ -165,13 +126,16 @@ function DegreeRoadMap() {
 
   async function getActivities() {
     axios
-      .get("http://localhost:5000/api/activities/student-activities", {
+      .get(`${API_BASE_URL}/api/activities/student-activities/${studentYr}`, {
         headers: {
           Authorization: `Bearer ${user?.access}`,
         },
       })
-      .then((response) => parseActivities(response.data.combinedActivites))
-      .catch((error) => setError(error));
+      .then((response) => {
+        setNumOfActivitiesCompleted(response.data.numOfSemActivitiesCompleted);
+        parseActivities(response.data.combinedActivites);
+      })
+      .catch((error) => {});
   }
 
   async function handleUpdateActivity(
@@ -183,7 +147,7 @@ function DegreeRoadMap() {
       case "save":
         axios
           .patch(
-            `http://localhost:5000/api/users/student-activities/update-activity/${activityId}`,
+            `${API_BASE_URL}/api/users/student-activities/update-activity/${activityId}`,
             {
               modificationType: "save",
               comment: newNoteBody?.comment,
@@ -223,7 +187,7 @@ function DegreeRoadMap() {
       case "delete":
         axios
           .patch(
-            `http://localhost:5000/api/users/student-activities/update-activity/${activityId}`,
+            `${API_BASE_URL}/api/users/student-activities/update-activity/${activityId}`,
             {
               modificationType: "delete",
             },
@@ -262,7 +226,7 @@ function DegreeRoadMap() {
       case "status-complete":
         axios
           .patch(
-            `http://localhost:5000/api/users/student-activities/update-activity/${activityId}`,
+            `${API_BASE_URL}/api/users/student-activities/update-activity/${activityId}`,
             {
               modificationType: "status-complete",
             },
@@ -302,7 +266,7 @@ function DegreeRoadMap() {
   ) {
     axios
       .post(
-        `http://localhost:5000/api/users/student-activities/add-activity/${activityId}`,
+        `${API_BASE_URL}/api/users/student-activities/add-activity/${activityId}`,
         {
           status: "in-progress",
         },
@@ -337,7 +301,7 @@ function DegreeRoadMap() {
   ) {
     axios
       .delete(
-        `http://localhost:5000/api/users/student-activities/delete-activity/${activityId}`,
+        `${API_BASE_URL}/api/users/student-activities/delete-activity/${activityId}`,
         {
           headers: {
             Authorization: `Bearer ${user?.access}`,
@@ -1069,12 +1033,24 @@ function DegreeRoadMap() {
           )}
         </div>
         <div className="activity-progress-tracker">
-          <label htmlFor="activities-completed">
-            Semester activities completed
-          </label>
-          <p id="activities-completed" className="activities-completed">
-            {numOfActivitiesCompleted}/{numOfTotalActivities}
-          </p>
+          {numOfTotalActivities > 0 &&
+          numOfActivitiesCompleted === numOfTotalActivities ? (
+            <>
+              <label htmlFor="activities-completed">
+                All semester activities completed!
+              </label>
+              <strong className="activities-completed-medal">🎖️</strong>
+            </>
+          ) : (
+            <>
+              <label htmlFor="activities-completed">
+                Semester activities completed
+              </label>
+              <p id="activities-completed" className="activities-completed">
+                {numOfActivitiesCompleted}/{numOfTotalActivities}
+              </p>
+            </>
+          )}
         </div>
         {/* div below is whats causing minimizing on mobile */}
         <div className="alumni-destination-container">
@@ -1085,38 +1061,22 @@ function DegreeRoadMap() {
             <div>
               <p className="section-sub-title">Careers</p>
               <ul>
-                <li>Google</li>
-                <li>iHeartMedia</li>
-                <li>NYC Department of Education</li>
-                <li>Minds Matter NYC</li>
-                <li>Sony</li>
-                <li>RSA Security</li>
-                <li>Federal Highway Administration</li>
-                <li>Creative Art Works</li>
-                <li>SEQ Technology</li>
-                <li>Pomelatto</li>
-                <li>NBCUniversal</li>
-                <li>Clinton Foundation</li>
-                <li>Tiffany & Co</li>
-                <li>Capital One</li>
-                <li>Giving Forward</li>
-                <li>Oppenheimer & Co</li>
-                <li>FOX</li>
-                <li>YMCA</li>
-                <li>Pratt Institute</li>
-                <li>Memorial Sloan Kettering</li>
+                {alumniDestination &&
+                  alumniDestination[
+                    user?.department as keyof typeof alumniDestination
+                  ].careers.map((career, idx) => <li key={idx}>{career}</li>)}
               </ul>
             </div>
 
-            <hr className="section-divider" />
             <div>
               <p className="section-sub-title">Graduate Programs</p>
               <ul>
-                <li>JD, Law</li>
-                <li>MA, Media Studies</li>
-                <li>MA, Public Policy</li>
-                <li>MBA, Human Resources Management and Services</li>
-                <li>PhD, Communication and Rhetoric</li>
+                {alumniDestination &&
+                  alumniDestination[
+                    user?.department as keyof typeof alumniDestination
+                  ].graduatePrograms.map((prog, idx) => (
+                    <li key={idx}>{prog}</li>
+                  ))}
               </ul>
             </div>
           </div>
@@ -1127,13 +1087,13 @@ function DegreeRoadMap() {
           <p className="section-sub-title">Organizations you can join</p>
           <div className="tabs-wrapper">
             <div className="tabs">
-              {categories.map((category, index) => (
+              {categories.map((category, idx) => (
                 <label
+                  key={idx}
                   className={`tab ${
-                    selectedCategory === index ? "selected" : ""
+                    selectedCategory === idx ? "selected" : ""
                   }`}
-                  key={index}
-                  onClick={() => setSelectedCategory(index)}
+                  onClick={() => setSelectedCategory(idx)}
                 >
                   {category}
                 </label>
@@ -1141,12 +1101,10 @@ function DegreeRoadMap() {
             </div>
             <div className="tab-categories">
               <ul>
-                {subCategories[selectedCategory]?.length > 0 ? (
-                  subCategories[selectedCategory].map((subCategory, index) => (
-                    <li key={index}>{subCategory}</li>
-                  ))
+                {items && items.length > 0 ? (
+                  items.map((item, idx) => <li key={idx}>&#8640; {item}</li>)
                 ) : (
-                  <li>No subcategories available</li>
+                  <li>No items available</li>
                 )}
               </ul>
             </div>

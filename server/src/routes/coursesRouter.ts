@@ -12,7 +12,6 @@ import authenticateToken from "../middleware/authenticateToken";
 const router = express.Router();
 
 // get all courses
-// remember to change this to only allow users with student role to access this endpoint
 router.get("/", authenticateToken, getAllCourses);
 
 // add a course

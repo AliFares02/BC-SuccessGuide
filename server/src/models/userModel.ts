@@ -13,6 +13,7 @@ interface User extends Document {
   year?: "First" | "Second" | "Third" | "Fourth";
   gpa?: number;
   courses?: {
+    is_internship_req_and_req_met?: any;
     courseCode: string;
     semester: string;
     status: "taken" | "in-progress";
@@ -38,6 +39,14 @@ interface User extends Document {
     completedAt?: Date;
     startedAt?: Date;
   }[];
+  afst_chosen_additional_major?: string;
+  afst_chosen_additional_major_courses?: {
+    courseCode: string;
+    grade: string;
+    semester_completed: string;
+    credits: number;
+  }[];
+  afst_chosen_additional_major_credits_completed?: boolean;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 }
@@ -109,6 +118,7 @@ const userSchema = new mongoose.Schema<User>({
           "D-",
           "F",
           "P/CR",
+          "N/A",
         ],
         maxlength: 4,
         required: function (this: { status: string }) {
@@ -116,6 +126,16 @@ const userSchema = new mongoose.Schema<User>({
         },
       },
       comment: { type: String },
+      is_internship_req_and_req_met: {
+        type: Boolean,
+        default: function (this: any) {
+          return (this.courseCode === "COMM 4100" ||
+            this.courseCode === "COMM 4000") &&
+            this.ownerDocument()?.department === "Communication"
+            ? false
+            : undefined;
+        },
+      },
     },
   ],
   activities: [
@@ -135,6 +155,52 @@ const userSchema = new mongoose.Schema<User>({
       startedAt: { type: Date, default: Date.now },
     },
   ],
+  afst_chosen_additional_major: {
+    type: String,
+    default: undefined,
+  },
+  afst_chosen_additional_major_courses: {
+    type: [
+      {
+        courseCode: { type: String, required: true },
+        grade: {
+          type: String,
+          enum: [
+            "A+",
+            "A",
+            "A-",
+            "B+",
+            "B",
+            "B-",
+            "C+",
+            "C",
+            "C-",
+            "D+",
+            "D",
+            "D-",
+            "F",
+            "P/CR",
+            "N/A",
+          ],
+          maxlength: 4,
+          required: true,
+        },
+        semester_completed: {
+          type: String,
+          required: true,
+        },
+        credits: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    default: undefined,
+  },
+  afst_chosen_additional_major_credits_completed: {
+    type: Boolean,
+    default: undefined,
+  },
   resetPasswordToken: {
     type: String,
   },

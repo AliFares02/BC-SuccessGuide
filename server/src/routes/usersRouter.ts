@@ -24,6 +24,14 @@ import {
   updateStudentAccount,
   requestPasswordReset,
   resetPassword,
+  createAFSTChosenAddMajor,
+  updateAFSTChosenAddMajor,
+  createAFSTAddCourse,
+  deleteAFSTAddCourse,
+  getAFSTChosenMajor,
+  getAFSTAdditionalCourses,
+  getStudentYear,
+  editPastCourseSemesterTaken,
 } from "../controllers/userController";
 import authenticateToken from "../middleware/authenticateToken";
 
@@ -32,6 +40,8 @@ const router = express.Router();
 router.post("/sign-up", signUp);
 
 router.post("/login", login);
+
+router.get("/account/year", authenticateToken, getStudentYear);
 
 router.get("/account", authenticateToken, getStudentAccount);
 
@@ -73,6 +83,12 @@ router.post("/past-courses/add/:courseCode", authenticateToken, addPastCourse);
 
 router.post("/current-courses/add", authenticateToken, addCurrentCourse);
 
+router.patch(
+  "/past-courses/edit-semester/:courseCode",
+  authenticateToken,
+  editPastCourseSemesterTaken
+);
+
 router.delete(
   "/current-courses/remove/:courseCode",
   authenticateToken,
@@ -96,5 +112,33 @@ router.get("/incomplete-courses", authenticateToken, getIncompleteCourses);
 router.post("/desired-gpa", authenticateToken, getDesiredGPA);
 
 router.post("/estimated-gpa", authenticateToken, getGPAEstimator);
+
+router.get("/afst-additional-major", authenticateToken, getAFSTChosenMajor);
+
+router.post(
+  "/afst-additional-major/add-major",
+  authenticateToken,
+  createAFSTChosenAddMajor
+);
+router.patch(
+  "/afst-additional-major/update-major",
+  authenticateToken,
+  updateAFSTChosenAddMajor
+);
+router.get(
+  "/afst-additional-major/courses",
+  authenticateToken,
+  getAFSTAdditionalCourses
+);
+router.post(
+  "/afst-additional-major/add-course/:courseCode",
+  authenticateToken,
+  createAFSTAddCourse
+);
+router.delete(
+  "/afst-additional-major/delete-course/:courseCode",
+  authenticateToken,
+  deleteAFSTAddCourse
+);
 
 export default router;

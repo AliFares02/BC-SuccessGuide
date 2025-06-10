@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../api/config";
 import axios from "axios";
 import React, { useState } from "react";
 import { CgSpinner } from "react-icons/cg";
@@ -12,7 +13,7 @@ function RequestResetPassword() {
     setLoading(true);
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/users/request-reset-password", {
+      .post(`${API_BASE_URL}/api/users/request-reset-password`, {
         email,
       })
       .then((response) => {

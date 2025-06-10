@@ -4,6 +4,8 @@ import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import useLogIn from "../hooks/useLogIn";
 import useSignUp from "../hooks/useSignUp";
 import { Link } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
+import { MdInfo } from "react-icons/md";
 
 function SignUpLogin() {
   const [authenticationOption, setAuthenticationOption] = useState("login");
@@ -108,6 +110,20 @@ function SignUpLogin() {
           </form>
         ) : (
           <form onSubmit={handleSignup} className="authentication-form">
+            <Tooltip
+              id="sign-up-more-info"
+              place="top"
+              style={{
+                zIndex: "1500",
+                whiteSpace: "normal",
+                maxWidth: "250px",
+              }}
+            />
+            <MdInfo
+              data-tooltip-id="sign-up-more-info"
+              data-tooltip-content="Major undecided? Select any department for now — you can update it later in your settings"
+              className="sign-up-more-info-icon"
+            />
             <h2>Sign Up</h2>
             <label htmlFor="name">Name</label>
             <div className="input-div">

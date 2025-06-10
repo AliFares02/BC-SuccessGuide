@@ -1,0 +1,137 @@
+{
+  "Communication": {
+    "General": [
+      "Center for Communication",
+      "International Association of Business Communicators",
+      "National Association of Government Communicators",
+      "National Communication Association",
+      "New York Women in Communications",
+      "Toastmasters International"
+    ],
+    "Media": [
+      "Emma Bowen Foundation (EBF)",
+      "International Radio & Television Society Foundation (IRTS)",
+      "National Association for Multi-ethnicity in Communications (NAMIC)",
+      "National Association of Broadcasters"
+    ],
+    "Emergency, Crisis & Risk Communication": [
+      "American Society for Health Care Risk Management",
+      "Association of Healthcare Emergency Preparedness Professionals",
+      "Association of Public-Safety Communications Officials (APCO International)",
+      "International Association of Emergency Managers",
+      "International Association of Risk and Crisis Communication (IARCC)"
+    ],
+    "Sports": [
+      "Association for Women in Sports Media",
+      "College Sports Communicators",
+      "National Sports Media Association",
+      "North American Society for Sport Management",
+      "Sport Marketing Association"
+    ],
+    "Journalism": [
+      "Asian American Journalists Association",
+      "Association of LGBTQ+ Journalists",
+      "Indigenous Journalists Association",
+      "National Association of Hispanic Journalists",
+      "National Association of Black Journalists",
+      "National Press Club",
+      "Religion News Association",
+      "Society of Environmental Journalists",
+      "Society of Professional Journalists"
+    ],
+    "Public Relations": [
+      "Hispanic Public Relations Association",
+      "International Public Relations Association",
+      "National Black Public Relations Society (NBPRS)",
+      "Public Relations Society of America (PRSA)",
+      "Public Relations Student Society of America (PRSSA)"
+    ],
+    "Social Media": [
+      "American Association of Social Media Professionals"
+    ],
+    "Talent Agents": [
+      "Association of Talent Agents"
+    ],
+    "Marketing": [
+      "American Marketing Association",
+      "Association of Marketing and Communication Professionals"
+    ],
+    "Event Planning": [
+      "Meeting Professionals International"
+    ],
+    "Human Resources": [
+      "Learning Guild",
+      "National Association of Workforce Development Professionals",
+      "National Human Resources Association (NHRA)",
+      "Society for Human Resource Management (SHRM)"
+    ],
+    "Pre-Law": [
+      "CUNY Law School Pipeline to Justice Program",
+      "The LatinoJustice PRLDEF LAWBound™ program",
+      "Training and Recruitment Initiative for Admission to Leading Law Schools (TRIALS)",
+      "University at Buffalo's Discover Law Program"
+    ],
+    "Health, Science & Technical": [
+      "Association of Science Communicators",
+      "Society for Health Communication",
+      "Society for Technical Communication"
+    ]
+  },
+  "Africana Studies": {
+    "Social Justice & Policy": [
+      "The Leadership Conference on Civil and Human Rights",
+      "NAACP",
+      "Color of Change",
+      "The Marshall Project",
+      "PolicyLink",
+      "National Urban League"
+    ],
+    "Education & Youth Development": [
+      "Teach for America",
+      "KIPP Foundation",
+      "Uncommon Schools",
+      "The Education Trust",
+      "Urban Assembly"
+    ],
+    "Arts, Media & Culture": [
+      "The Schomburg Center for Research in Black Culture",
+      "National Association of Black Journalists",
+      "Black Public Media",
+      "African American Policy Forum"
+    ],
+    "Law & Public Affairs": [
+      "American Civil Liberties Union (ACLU)",
+      "LatinoJustice PRLDEF",
+      "National Black Law Students Association (NBLSA)",
+      "Council on Legal Education Opportunity (CLEO)"
+    ],
+    "Nonprofit & Community Advocacy": [
+      "Brooklyn Movement Center",
+      "The New York Immigration Coalition",
+      "Dream.org",
+      "Harlem Children’s Zone"
+    ]
+  },
+  "Communication Sciences and Disorders": {
+    "Professional Organizations": [
+      "American Speech-Language-Hearing Association (ASHA)",
+      "National Student Speech Language Hearing Association (NSSLHA)",
+      "Academy of Neurologic Communication Disorders and Sciences (ANCDS)"
+    ],
+    "Healthcare & Clinical": [
+      "American Academy of Audiology",
+      "Speech-Language & Audiology Canada",
+      "International Association of Logopedics and Phoniatrics"
+    ],
+    "Early Intervention & Education": [
+      "Zero to Three",
+      "Division for Early Childhood (DEC)",
+      "Council for Exceptional Children (CEC)"
+    ],
+    "Research & Academia": [
+      "Cognitive Neuroscience Society",
+      "Society for Neuroscience",
+      "American Educational Research Association (AERA)"
+    ]
+  }
+}
