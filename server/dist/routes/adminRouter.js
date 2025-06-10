@@ -1,0 +1,24 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const authenticateAdmin_1 = __importDefault(require("../middleware/authenticateAdmin"));
+const authenticateToken_1 = __importDefault(require("../middleware/authenticateToken"));
+const adminController_1 = require("../controllers/adminController");
+const router = express_1.default.Router();
+router.post("/sign-up", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.signUpAdmin);
+router.post("/login", adminController_1.loginAdmin);
+router.get("/account", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getAdminAccount);
+router.patch("/update-account", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.updateAdminAccount);
+router.get("/students", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getAllStudents);
+router.get("/average-student-gpa", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getAvgStudentGPA);
+router.get("/courses/all", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getAllCoursesWithEnrollmentCt);
+router.get("/course/:courseCode/enrollees", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getCourseEnrollees);
+router.delete("/course/:courseCode/:studentId", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.unenrollStudentFromCourse);
+router.get("/course/:courseCode/comments", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getCourseComments);
+router.get("/activities", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getAllActivitiesWithNumOfCurrEngaged);
+router.get("/semester-inactive-students", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getListOfInactiveStudentsForCurrentSem);
+router.get("/activity/:activityId/active-students", authenticateToken_1.default, authenticateAdmin_1.default, adminController_1.getActivityActiveStudents);
+exports.default = router;
