@@ -63,7 +63,6 @@ type InactiveStudent = {
   gpa: number;
 };
 function AdminActivities() {
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [parsedActivities, setParsedActivities] = useState<{
     [key: string]: Activity[];
   }>({});
@@ -154,10 +153,11 @@ function AdminActivities() {
         },
       })
       .then((response) => {
+        console.log("activities", response);
         parseActivities(response.data.activities);
         setLoadingActivities(false);
       })
-      .catch((error) => {});
+      .catch((error) => console.error(error));
     setLoadingActivities(false);
   }
 
