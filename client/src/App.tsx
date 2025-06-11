@@ -63,6 +63,8 @@ function App() {
             user ? (
               user.role === "student" ? (
                 <Dashboard />
+              ) : user.role === "admin" ? (
+                <Navigate to="/admin" />
               ) : (
                 <UnAuthorizedErrorPage />
               )

@@ -1196,10 +1196,6 @@ body {
   font-weight: 500;
 }
 
-.average-gpa-container {
-  margin-bottom: 5rem;
-}
-
 .gpa,
 .average-gpa {
   font-size: 1.5rem;
@@ -1834,7 +1830,7 @@ body {
   justify-content: center;
   align-items: center;
   width: 90%;
-  margin: 0 auto;
+  margin: 0 auto 2rem auto;
 }
 
 .students-table thead p {
