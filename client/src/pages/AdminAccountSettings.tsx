@@ -45,7 +45,16 @@ function AccountAccountSettings() {
         },
       })
       .then((response) => setAdminAcctInfo(response.data))
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error.response.data.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function updateAdminAccount(e: React.FormEvent<HTMLFormElement>) {
@@ -93,6 +102,13 @@ function AccountAccountSettings() {
       .catch((error) => {
         setUpdateAdminLoading(false);
         setUpdateAdminAccError(error.response.data.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 
@@ -104,7 +120,16 @@ function AccountAccountSettings() {
         },
       })
       .then(() => logout())
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error.response.data.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   return (

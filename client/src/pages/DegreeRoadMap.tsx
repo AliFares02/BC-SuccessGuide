@@ -17,9 +17,11 @@ import useAuthContext from "../hooks/useAuthContext";
 import { getCurrentSemesterWithYear } from "../utils/getCurrentSemesterWithYear";
 import alumniDestination from "../utils/alumniDestination.json";
 import organizations from "../utils/organizations.json";
+import useLogout from "../hooks/useLogout";
 
 function DegreeRoadMap() {
   const { user, tkFetchLoading } = useAuthContext();
+  const { logout } = useLogout();
   const currentSemesterWYr = getCurrentSemesterWithYear();
   const [studentYr, setStudentYr] = useState("");
   const [parsedActivities, setParsedActivities] = useState<{
@@ -70,9 +72,16 @@ function DegreeRoadMap() {
       .then((response) => {
         setStudentYr(response.data.studentYear);
       })
-      .catch((error) =>
-        toast.error(error.response.data.msg || error.response.data.error)
-      );
+      .catch((error) => {
+        toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   interface Activity {
@@ -135,7 +144,15 @@ function DegreeRoadMap() {
         setNumOfActivitiesCompleted(response.data.numOfSemActivitiesCompleted);
         parseActivities(response.data.combinedActivites);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleUpdateActivity(
@@ -182,7 +199,16 @@ function DegreeRoadMap() {
             toast.success(response.data.msg);
             setSelectedNoteComment(null);
           })
-          .catch((error) => toast.error(error.response.data.msg));
+          .catch((error) => {
+            toast.error(error?.response?.data?.msg);
+            if (
+              error?.response?.status === 401 &&
+              (error?.response?.data?.msg === "Unauthorized request" ||
+                error?.response?.data?.msg === "No token provided")
+            ) {
+              logout();
+            }
+          });
         break;
       case "delete":
         axios
@@ -221,7 +247,16 @@ function DegreeRoadMap() {
             toast.success(response.data.msg);
             setSelectedNoteComment(null);
           })
-          .catch((error) => toast.error(error.response.data.msg));
+          .catch((error) => {
+            toast.error(error?.response?.data?.msg);
+            if (
+              error?.response?.status === 401 &&
+              (error?.response?.data?.msg === "Unauthorized request" ||
+                error?.response?.data?.msg === "No token provided")
+            ) {
+              logout();
+            }
+          });
         break;
       case "status-complete":
         axios
@@ -254,7 +289,16 @@ function DegreeRoadMap() {
             toast.success(response.data.msg);
             setSelectedNoteComment(null);
           })
-          .catch((error) => toast.error(error.response.data.msg));
+          .catch((error) => {
+            toast.error(error?.response?.data?.msg);
+            if (
+              error?.response?.status === 401 &&
+              (error?.response?.data?.msg === "Unauthorized request" ||
+                error?.response?.data?.msg === "No token provided")
+            ) {
+              logout();
+            }
+          });
         break;
       default:
     }
@@ -292,7 +336,16 @@ function DegreeRoadMap() {
         });
         toast.success(response.data.msg);
       })
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error?.response?.data?.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleDeleteActivity(
@@ -325,7 +378,16 @@ function DegreeRoadMap() {
         setNumOfActivitiesCompleted((prev) => prev - 1);
         toast.success(response.data.msg);
       })
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error?.response?.data?.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
   return (
     <div className="degree-roadmap-container">

@@ -53,7 +53,16 @@ function AccountSettings() {
         },
       })
       .then((response) => setStudentAcctInfo(response.data))
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error.response.data.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function updateStudentAccount(e: React.FormEvent<HTMLFormElement>) {
@@ -116,6 +125,13 @@ function AccountSettings() {
       .catch((error) => {
         setUpdateStudentLoading(false);
         setUpdateStudentAccountError(error.response.data.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 
@@ -127,7 +143,16 @@ function AccountSettings() {
         },
       })
       .then(() => logout())
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error?.response?.data?.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   return (

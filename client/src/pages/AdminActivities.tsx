@@ -13,6 +13,7 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import { CgSpinner } from "react-icons/cg";
+import useLogout from "../hooks/useLogout";
 
 interface Activity {
   _id: string;
@@ -98,6 +99,7 @@ function AdminActivities() {
   const [loading, setLoading] = useState(false);
   const [maxTableRows, setMaxTableRows] = useState(0);
   const { user } = useAuthContext();
+  const { logout } = useLogout();
 
   useEffect(() => {
     if (user) {
@@ -157,7 +159,15 @@ function AdminActivities() {
         parseActivities(response.data.activities);
         setLoadingActivities(false);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
     setLoadingActivities(false);
   }
 
@@ -187,7 +197,15 @@ function AdminActivities() {
           setActivityActiveStudents(response.data.activeStudents);
           setLoading(false);
         })
-        .catch((error) => {});
+        .catch((error) => {
+          if (
+            error.response.status === 401 &&
+            (error.response.data.msg === "Unauthorized request" ||
+              error.response.data.msg === "No token provided")
+          ) {
+            logout();
+          }
+        });
     }
   }
 
@@ -288,7 +306,16 @@ function AdminActivities() {
           setUpdatedActivityBody(null);
           setNewActivityInfoLink("");
         })
-        .catch((error) => toast.error(error.response.data.msg));
+        .catch((error) => {
+          toast.error(error.response.data.msg);
+          if (
+            error.response.status === 401 &&
+            (error.response.data.msg === "Unauthorized request" ||
+              error.response.data.msg === "No token provided")
+          ) {
+            logout();
+          }
+        });
     }
   }
 
@@ -323,7 +350,15 @@ function AdminActivities() {
         setDeleteActivityPrompt(false);
         toast.success(response.data.msg);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function getListOfInactiveSemesterStudents() {
@@ -339,7 +374,15 @@ function AdminActivities() {
         );
         setInactiveStudents(response.data.studentsWithLowEngagement);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   return (

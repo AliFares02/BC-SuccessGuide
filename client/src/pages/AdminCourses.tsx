@@ -14,6 +14,7 @@ import { IoIosClose } from "react-icons/io";
 import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import useAuthContext from "../hooks/useAuthContext";
+import useLogout from "../hooks/useLogout";
 
 type Course = {
   _id: string;
@@ -108,6 +109,7 @@ function AdminCourses() {
     Map<string, string[]>
   >(new Map<string, string[]>());
   const { user } = useAuthContext();
+  const { logout } = useLogout();
 
   // state for communications department chair for purpose of adding concentration courses
   const [courseIsConcentration, setCourseIsConcentration] = useState("No");
@@ -305,7 +307,15 @@ function AdminCourses() {
           new Map(Object.entries(response.data.existingPrereqStructure))
         );
       })
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function getCourseEnrollees() {
@@ -332,7 +342,15 @@ function AdminCourses() {
           setEnrolledStudents(response.data.enrollees);
           setLoading(false);
         })
-        .catch((error) => {});
+        .catch((error) => {
+          if (
+            error.response.status === 401 &&
+            (error.response.data.msg === "Unauthorized request" ||
+              error.response.data.msg === "No token provided")
+          ) {
+            logout();
+          }
+        });
     }
   }
 
@@ -360,7 +378,15 @@ function AdminCourses() {
           setCourseComments(response.data.commentStrings);
           setLoadingComments(false);
         })
-        .catch((error) => {});
+        .catch((error) => {
+          if (
+            error.response.status === 401 &&
+            (error.response.data.msg === "Unauthorized request" ||
+              error.response.data.msg === "No token provided")
+          ) {
+            logout();
+          }
+        });
     }
   }
 
@@ -409,7 +435,14 @@ function AdminCourses() {
         toast.success(response.data.msg);
       })
       .catch((error) => {
-        setCreateCourseError(error.response.data.msg);
+        setCreateCourseError(error?.response?.data?.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 
@@ -469,7 +502,16 @@ function AdminCourses() {
         setDeleteCoursePrompt(false);
         toast.success(response.data.msg);
       })
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error?.response?.data?.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
   async function handleDeleteCourse() {
     axios
@@ -509,6 +551,13 @@ function AdminCourses() {
       })
       .catch((error) => {
         toast.error(error.response.data.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 

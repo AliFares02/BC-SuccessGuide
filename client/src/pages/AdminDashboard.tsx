@@ -10,6 +10,7 @@ import {
 } from "react-icons/md";
 import { FaSort } from "react-icons/fa";
 import useAuthContext from "../hooks/useAuthContext";
+import useLogout from "../hooks/useLogout";
 
 type Student = {
   activities: {
@@ -123,6 +124,7 @@ type ParsedStudent = {
 
 function AdminDashboard() {
   const { user } = useAuthContext();
+  const { logout } = useLogout();
   const [allStudents, setAllStudents] = useState<ParsedStudent[]>([]);
   const [page, setPage] = useState(1);
   const [maxPage, setMaxPage] = useState(0);
@@ -203,7 +205,15 @@ function AdminDashboard() {
         setMaxPage(response.data.totalPages);
         parseStudents(response.data.students);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleDeleteStudent() {
@@ -222,7 +232,15 @@ function AdminDashboard() {
         setSelectedCategory("current courses");
         setDeleteStudentPrompt(false);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function getAvgStudentGPA() {
@@ -233,7 +251,15 @@ function AdminDashboard() {
         },
       })
       .then((response) => setAverageStudentGPA(response.data.averageGPA))
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
   return (
     <div className="admin-dashboard-container">

@@ -19,6 +19,7 @@ import {
 import careerOutlookStats from "../utils/careerOutlookStats.json";
 import whereYouCanGo from "../utils/whereYouCanGo.json";
 import { Link } from "react-router-dom";
+import useLogout from "../hooks/useLogout";
 
 function Dashboard() {
   const [currentCourses, setCurrentCourses] = useState([]);
@@ -69,6 +70,7 @@ function Dashboard() {
   ] = useState("");
   const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
   const { user, tkFetchLoading } = useAuthContext();
+  const { logout } = useLogout();
 
   useEffect(() => {
     fetchUserDashboard();
@@ -129,7 +131,15 @@ function Dashboard() {
             }
           )
         )
-        .catch((error) => {});
+        .catch((error) => {
+          if (
+            error?.response?.status === 401 &&
+            (error?.response?.data?.msg === "Unauthorized request" ||
+              error?.response?.data?.msg === "No token provided")
+          ) {
+            logout();
+          }
+        });
     }
   }
 
@@ -185,9 +195,16 @@ function Dashboard() {
         setAvailableSemesters(availableSemesters);
         setStudentYear(response.data.studentYear);
       })
-      .catch((error) =>
-        toast.error(error.response.data.msg || error.response.data.error)
-      );
+      .catch((error) => {
+        toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function getAfstChosenMajor() {
@@ -200,11 +217,18 @@ function Dashboard() {
       .then((response) => {
         setExistingAfstChosenMajor(response.data.additionalMajor);
       })
-      .catch((error) =>
+      .catch((error) => {
         setAfstChosenMajorError(
           error.response.data.msg || error.response.data.error
-        )
-      );
+        );
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleAfstAddMajor() {
@@ -233,11 +257,18 @@ function Dashboard() {
         setAfstChosenMajorError(null);
         toast.success(response.data.msg);
       })
-      .catch((error) =>
+      .catch((error) => {
         setAfstChosenMajorError(
           error.response.data.msg || error.response.data.error
-        )
-      );
+        );
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleAfstAddMajorEdit() {
@@ -267,6 +298,13 @@ function Dashboard() {
         setAfstChosenMajorError(
           error.response.data.msg || error.response.data.error
         );
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 
@@ -290,6 +328,13 @@ function Dashboard() {
       })
       .catch((error) => {
         toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 

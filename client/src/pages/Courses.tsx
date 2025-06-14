@@ -22,6 +22,7 @@ import {
 } from "../utils/getNextSemesterRecommendedCourseStructure";
 import recommendedCourses from "../utils/recommendedCourseStructure.json";
 import { useLocation } from "react-router-dom";
+import useLogout from "../hooks/useLogout";
 
 interface PastCourse {
   courseCode: string;
@@ -83,6 +84,7 @@ function Courses() {
   const [newPastCourseSemester, setNewPastCourseSemester] = useState("");
 
   const { user, tkFetchLoading } = useAuthContext();
+  const { logout } = useLogout();
 
   useEffect(() => {
     if (!tkFetchLoading) {
@@ -157,7 +159,15 @@ function Courses() {
           setWhatIfCourses(incompleteCoursesRes.data?.inCompleteCourses);
         })
       )
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   function getRecommendedCourseStructure(studentYr: string) {
@@ -192,6 +202,13 @@ function Courses() {
         .catch((error) => {
           setDesiredGPAError(error.response.data.error);
           setAchievableDesiredGPAMsg("");
+          if (
+            error?.response?.status === 401 &&
+            (error?.response?.data?.msg === "Unauthorized request" ||
+              error?.response?.data?.msg === "No token provided")
+          ) {
+            logout();
+          }
         });
     }
   }
@@ -215,6 +232,13 @@ function Courses() {
       })
       .catch((error) => {
         toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
       });
   }
 
@@ -333,7 +357,16 @@ function Courses() {
             setSelectedCurrToPastCourse(null);
             setGradeRecieved("");
           })
-          .catch((error) => toast.error(error.response.data.msg));
+          .catch((error) => {
+            toast.error(error?.response?.data?.msg);
+            if (
+              error?.response?.status === 401 &&
+              (error?.response?.data?.msg === "Unauthorized request" ||
+                error?.response?.data?.msg === "No token provided")
+            ) {
+              logout();
+            }
+          });
       } else {
         toast.error("Must provide a grade");
       }
@@ -405,7 +438,16 @@ function Courses() {
         }
         toast.success(response.data.msg);
       })
-      .catch((error) => toast.error(error.response.data.msg));
+      .catch((error) => {
+        toast.error(error?.response?.data?.msg);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleCourseComment(
@@ -445,7 +487,16 @@ function Courses() {
             toast.success(response.data.msg);
             setSelectedCourseComment(null);
           })
-          .catch((error) => toast.error(error.response.data.msg));
+          .catch((error) => {
+            toast.error(error?.response?.data?.msg);
+            if (
+              error?.response?.status === 401 &&
+              (error?.response?.data?.msg === "Unauthorized request" ||
+                error?.response?.data?.msg === "No token provided")
+            ) {
+              logout();
+            }
+          });
         break;
       case "delete":
         axios
@@ -479,9 +530,16 @@ function Courses() {
             toast.success(response.data.msg);
             setSelectedCourseComment(null);
           })
-          .catch((error) =>
-            toast.error(error.response.data.msg || error.response.data.error)
-          );
+          .catch((error) => {
+            toast.error(error.response.data.msg || error.response.data.error);
+            if (
+              error?.response?.status === 401 &&
+              (error?.response?.data?.msg === "Unauthorized request" ||
+                error?.response?.data?.msg === "No token provided")
+            ) {
+              logout();
+            }
+          });
       default:
     }
   }
@@ -496,7 +554,15 @@ function Courses() {
       .then((response) =>
         setAfstAdditionalCourses(response.data.additionalCourses)
       )
-      .catch((error) => {});
+      .catch((error) => {
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function handleRemovePastAfstAddCourse(courseCode: string) {
@@ -516,9 +582,16 @@ function Courses() {
         );
         toast.success(response.data.msg);
       })
-      .catch((error) =>
-        toast.error(error.response.data.msg || error.response.data.error)
-      );
+      .catch((error) => {
+        toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   async function getStudentYear() {
@@ -537,12 +610,19 @@ function Courses() {
         setAvailableSemesters(availableSemesters);
         getRecommendedCourseStructure(response.data.studentYear);
       })
-      .catch((error) =>
-        toast.error(error.response.data.msg || error.response.data.error)
-      );
+      .catch((error) => {
+        toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
-  function handlePastCourseSemesterChange(
+  async function handlePastCourseSemesterChange(
     courseCode: string,
     isAfstAdditionalCredCourse: boolean,
     semester: string
@@ -607,9 +687,16 @@ function Courses() {
         toast.success(response.data.msg);
         setEditPastCourseSemester(null);
       })
-      .catch((error) =>
-        toast.error(error.response.data.msg || error.response.data.error)
-      );
+      .catch((error) => {
+        toast.error(error.response.data.msg || error.response.data.error);
+        if (
+          error?.response?.status === 401 &&
+          (error?.response?.data?.msg === "Unauthorized request" ||
+            error?.response?.data?.msg === "No token provided")
+        ) {
+          logout();
+        }
+      });
   }
 
   return (
