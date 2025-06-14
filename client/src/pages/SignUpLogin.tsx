@@ -8,6 +8,7 @@ import { Tooltip } from "react-tooltip";
 import { MdInfo } from "react-icons/md";
 
 function SignUpLogin() {
+  const [showRefreshHint, setShowRefreshHint] = useState(false);
   const [authenticationOption, setAuthenticationOption] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loginValues, setLoginValues] = useState({
@@ -36,19 +37,38 @@ function SignUpLogin() {
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await login(loginValues);
+    const timeoutId = setTimeout(() => setShowRefreshHint(true), 10000);
+
+    try {
+      await login(loginValues);
+    } finally {
+      clearTimeout(timeoutId);
+      setShowRefreshHint(false);
+    }
   }
 
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await signUp(signupValues);
+    const timeoutId = setTimeout(() => setShowRefreshHint(true), 10000);
+
+    try {
+      await signUp(signupValues);
+    } finally {
+      clearTimeout(timeoutId);
+      setShowRefreshHint(false);
+    }
   }
+
   return (
     <div className="authenticate-container">
       <h1 className="authentication-page-main-logo">BC SuccessGuide</h1>
+
       <div className="dynamic-authenticate-container">
         {authenticationOption === "login" ? (
           <form onSubmit={handleLogin} className="authentication-form">
+            <div className={`refresh-hint ${showRefreshHint ? "show" : ""}`}>
+              *If the page doesn't load in 30 seconds, try refreshing.
+            </div>
             <h2>Log in</h2>
             <label htmlFor="email">Email</label>
             <div className="input-div">

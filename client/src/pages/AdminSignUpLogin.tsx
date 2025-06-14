@@ -8,6 +8,7 @@ import UnAuthorizedErrorPage from "./UnAuthorizedErrorPage";
 import { Link } from "react-router-dom";
 
 function AdminSignUpLogin() {
+  const [showRefreshHint, setShowRefreshHint] = useState(false);
   const [authenticationOption, setAuthenticationOption] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loginValues, setLoginValues] = useState({
@@ -37,12 +38,26 @@ function AdminSignUpLogin() {
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await login(loginValues);
+    const timeoutId = setTimeout(() => setShowRefreshHint(true), 10000);
+
+    try {
+      await login(loginValues);
+    } finally {
+      clearTimeout(timeoutId);
+      setShowRefreshHint(false);
+    }
   }
 
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await signUp(signupValues);
+    const timeoutId = setTimeout(() => setShowRefreshHint(true), 10000);
+
+    try {
+      await signUp(signupValues);
+    } finally {
+      clearTimeout(timeoutId);
+      setShowRefreshHint(false);
+    }
   }
   return (
     <div className="authenticate-container">
@@ -50,6 +65,9 @@ function AdminSignUpLogin() {
       <div className="dynamic-authenticate-container">
         {authenticationOption === "login" && user?.role !== "admin" ? (
           <form onSubmit={handleLogin} className="authentication-form">
+            <div className={`refresh-hint ${showRefreshHint ? "show" : ""}`}>
+              *If the page doesn't load in 30 seconds, try refreshing.
+            </div>
             <h2>Admin</h2>
             <h3>Log in</h3>
             <label htmlFor="email">Email</label>

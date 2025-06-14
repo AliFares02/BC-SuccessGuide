@@ -2690,6 +2690,21 @@ select:disabled {
   color: #ffffff;
 }
 
+.refresh-hint {
+  font-size: clamp(0.75rem, 0.8vw + 0.5rem, 0.85rem) !important;
+  margin-bottom: 0.3rem;
+  color: #e77700;
+  padding: 0.15rem;
+  background-color: #fae0e3;
+  border: 1px solid #e77700;
+  border-radius: 0.2rem;
+  display: none !important;
+}
+
+.refresh-hint.show {
+  display: block;
+}
+
 .authentication-form label,
 .request-reset-password-form label,
 .reset-password-form label {
