@@ -6,6 +6,7 @@ import { IoIosArrowForward, IoMdAddCircle } from "react-icons/io";
 import {
   MdOutlineEdit,
   MdOutlinePendingActions,
+  MdOutlineAssignmentTurnedIn,
   MdPlaylistAdd,
 } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -654,9 +655,15 @@ function Dashboard() {
                     semesterActivities[selectedActivityCategory]?.map(
                       (activity, idx) => (
                         <li key={idx}>
-                          <MdOutlinePendingActions
-                            style={{ color: "rgb(136, 35, 70)" }}
-                          />
+                          {activity.status === "completed" ? (
+                            <MdOutlineAssignmentTurnedIn
+                              style={{ color: "rgb(136, 35, 70)" }}
+                            />
+                          ) : activity.status === "in-progress" ? (
+                            <MdOutlinePendingActions
+                              style={{ color: "rgb(136, 35, 70)" }}
+                            />
+                          ) : null}
                           {activity.activityId.activity_description}
                         </li>
                       )
