@@ -51,10 +51,7 @@ function NotificationComponent({ onClose }: { onClose: () => void }) {
         </a>{" "}
         under "Enrollment Appointments," and view the recommended course plan
         for next semester{" "}
-        <a href="http://localhost:5173/courses#recommended-course-structure-section">
-          here
-        </a>
-        .
+        <a href="/courses#recommended-course-structure-section">here</a>.
       </div>
 
       <button
