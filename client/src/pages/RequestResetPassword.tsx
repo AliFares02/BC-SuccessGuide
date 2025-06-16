@@ -17,7 +17,9 @@ function RequestResetPassword() {
         email,
       })
       .then((response) => {
-        toast.success(`${response.data.msg}, make sure to check spam`);
+        toast.success(
+          `${response.data.msg}. Email may take a few minutes to arrive, make sure to also check spam`
+        );
         setLoading(false);
         setError(null);
       })

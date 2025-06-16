@@ -269,7 +269,7 @@ function requestPasswordReset(req, res) {
             user.resetPasswordToken = hashedToken;
             user.resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 15);
             yield user.save();
-            const resetURL = `${process.env.CLIENT_URL}/reset-password/${rawToken}`;
+            const resetURL = `https://www.bc-successguide.xyz/reset-password/${rawToken}`;
             yield (0, sendResetEmail_1.default)(user.email, resetURL);
             return res.status(200).json({ msg: "Reset email sent" });
         }

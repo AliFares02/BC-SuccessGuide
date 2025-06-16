@@ -293,7 +293,7 @@ export async function requestPasswordReset(
 
     await user.save();
 
-    const resetURL = `${process.env.CLIENT_URL}/reset-password/${rawToken}`;
+    const resetURL = `https://www.bc-successguide.xyz/reset-password/${rawToken}`;
     await sendResetEmail(user.email, resetURL);
     return res.status(200).json({ msg: "Reset email sent" });
   } catch (error) {
