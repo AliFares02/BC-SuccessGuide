@@ -128,7 +128,6 @@ function DegreeRoadMap() {
           activityB.activity.activity_priority
       );
     });
-    console.log("parsedActivities", parsedActivities);
 
     setParsedActivities(parsedActivities);
 
@@ -149,8 +148,6 @@ function DegreeRoadMap() {
         },
       })
       .then((response) => {
-        console.log("activities", response);
-
         setNumOfActivitiesCompleted(response.data.numOfSemActivitiesCompleted);
         parseActivities(response.data.combinedActivites);
       })
