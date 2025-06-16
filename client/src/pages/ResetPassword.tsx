@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 function ResetPassword() {
@@ -13,7 +13,8 @@ function ResetPassword() {
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { token } = useParams();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const navigate = useNavigate();
 
   async function handlePasswordReset(e: React.FormEvent<HTMLFormElement>) {
@@ -22,22 +23,30 @@ function ResetPassword() {
     setLoading(true);
     if (password !== confirmPassword) {
       setError("Passwords don't match");
-    } else {
-      axios
-        .post(`${API_BASE_URL}/api/users/reset-password/${token}`, {
-          newPassword: password,
-        })
-        .then((response) => {
-          toast.success(response.data.msg);
-          setError(null);
-          setLoading(false);
-          navigate("/authenticate");
-        })
-        .catch((error) => {
-          setLoading(false);
-          setError(error?.response?.data?.msg);
-        });
+      setLoading(false);
+      return;
     }
+
+    if (!token) {
+      setError("Invalid reset link");
+      setLoading(false);
+      return;
+    }
+
+    axios
+      .post(`${API_BASE_URL}/api/users/reset-password/${token}`, {
+        newPassword: password,
+      })
+      .then((response) => {
+        toast.success(response.data.msg);
+        setError(null);
+        setLoading(false);
+        navigate("/authenticate");
+      })
+      .catch((error) => {
+        setLoading(false);
+        setError(error?.response?.data?.msg);
+      });
   }
   return (
     <div className="reset-password-container">

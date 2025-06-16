@@ -196,7 +196,7 @@ function App() {
             )
           }
         />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
       {!hideComponent && user?.role !== "admin" ? <Footer /> : null}

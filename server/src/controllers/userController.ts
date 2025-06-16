@@ -292,8 +292,7 @@ export async function requestPasswordReset(
     user.resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 15);
 
     await user.save();
-
-    const resetURL = `https://www.bc-successguide.xyz/reset-password/${rawToken}`;
+    const resetURL = `https://www.bc-successguide.xyz/reset-password?token=${rawToken}`;
     await sendResetEmail(user.email, resetURL);
     return res.status(200).json({ msg: "Reset email sent" });
   } catch (error) {
