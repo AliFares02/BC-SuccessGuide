@@ -62,6 +62,12 @@ function DegreeRoadMap() {
     }
   }, [studentYr]);
 
+  useEffect(() => {
+    if (selectedNoteComment) {
+      setNewNoteBody(selectedNoteComment);
+    }
+  }, [selectedNoteComment]);
+
   async function getStudentYear() {
     axios
       .get(`${API_BASE_URL}/api/users/account/year`, {
@@ -122,6 +128,8 @@ function DegreeRoadMap() {
           activityB.activity.activity_priority
       );
     });
+    console.log("parsedActivities", parsedActivities);
+
     setParsedActivities(parsedActivities);
 
     setMaxTableRows(
@@ -141,6 +149,8 @@ function DegreeRoadMap() {
         },
       })
       .then((response) => {
+        console.log("activities", response);
+
         setNumOfActivitiesCompleted(response.data.numOfSemActivitiesCompleted);
         parseActivities(response.data.combinedActivites);
       })
@@ -1066,6 +1076,11 @@ function DegreeRoadMap() {
                 </textarea>
                 <div className="btn-wrapper">
                   <button
+                    disabled={
+                      JSON.stringify(selectedNoteComment) ===
+                        JSON.stringify(newNoteBody) ||
+                      !newNoteBody?.comment?.trim()
+                    }
                     className="save-note-btn"
                     onClick={() =>
                       handleUpdateActivity(
@@ -1114,7 +1129,6 @@ function DegreeRoadMap() {
             </>
           )}
         </div>
-        {/* div below is whats causing minimizing on mobile */}
         <div className="alumni-destination-container">
           <h2 className="page-sub-title">
             Alumni Destinations: Careers & Grad programs

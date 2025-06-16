@@ -155,7 +155,6 @@ function AdminActivities() {
         },
       })
       .then((response) => {
-        console.log("activities", response);
         parseActivities(response.data.activities);
         setLoadingActivities(false);
       })
