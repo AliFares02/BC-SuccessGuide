@@ -5,13 +5,7 @@
       "VITE_API_BASE_URL": "https://bc-successguide.onrender.com"
     }
   },
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/.*",
-      "dest": "/index.html" 
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
