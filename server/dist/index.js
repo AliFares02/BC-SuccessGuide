@@ -15,18 +15,21 @@ const allowedOrigins = process.env.CLIENT_URL
     : [];
 app.use((0, cors_1.default)({
     origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin)
             return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-            return callback(new Error(msg), false);
+        if (allowedOrigins.indexOf(origin) !== -1 ||
+            origin.includes("bc-successguide")) {
+            return callback(null, true);
         }
-        return callback(null, true);
+        return callback(new Error(`Origin ${origin} not allowed by CORS`), false);
     },
-    methods: "*",
-    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Explicitly list methods
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
 }));
+// Handle preflight requests
+app.options("*", (0, cors_1.default)());
 app.use(express_1.default.json());
 // main router entry point
 app.use("/api", mainRouter_1.default);
