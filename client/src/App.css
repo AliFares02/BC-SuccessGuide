@@ -78,6 +78,7 @@ body {
   align-items: center;
   height: 100dvh;
 }
+
 /* util styles */
 
 /* Notification styling */
@@ -515,7 +516,7 @@ body {
   align-items: center;
   position: absolute;
   inset: 0;
-  z-index: 1000;
+  z-index: 800;
   border-radius: 0.5rem;
   background-color: rgba(0, 0, 0, 0.3);
 }

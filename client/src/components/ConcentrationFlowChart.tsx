@@ -333,7 +333,7 @@ function ConcentrationFlowChart({
           <Tooltip
             id="concentration-more-info-icon"
             place="top"
-            style={{ zIndex: "1000", whiteSpace: "normal", maxWidth: "250px" }}
+            style={{ zIndex: "700", whiteSpace: "normal", maxWidth: "250px" }}
           />
           <MdInfo
             data-tooltip-id="concentration-more-info-icon"
@@ -347,7 +347,7 @@ function ConcentrationFlowChart({
           <Tooltip
             id="concentration-more-info-icon"
             place="top"
-            style={{ zIndex: "1000", whiteSpace: "normal", maxWidth: "250px" }}
+            style={{ zIndex: "700", whiteSpace: "normal", maxWidth: "250px" }}
           />
           <MdInfo
             data-tooltip-id="concentration-more-info-icon"
