@@ -1221,7 +1221,7 @@ function Courses() {
           {desiredGPAError ? (
             <p className="error">{desiredGPAError}</p>
           ) : achievableDesiredGPAMsg ? (
-            <p>{achievableDesiredGPAMsg}</p>
+            <p style={{ textAlign: "center" }}>{achievableDesiredGPAMsg}</p>
           ) : null}
           <hr className="courses-sections-divider" />
           <label
